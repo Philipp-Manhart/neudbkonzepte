@@ -1,15 +1,13 @@
 import { ProfileCard } from '@/components/app-profile-card';
 import { PastSurveys } from '@/components/app-past-surveys';
 
-
 export default async function ProfilePage() {
-
 	const userData = {
-    first_name: "Gabriel",
-    surname: "Jung",
-    email: "test@test.com"
-  }
-  const surveysData = [
+		first_name: 'Gabriel',
+		surname: 'Jung',
+		email: 'test@test.com',
+	};
+	const surveysData = [
 		{
 			title: 'Customer Satisfaction Survey',
 			date: '2025-02-15',
@@ -35,10 +33,12 @@ export default async function ProfilePage() {
 			questionCount: 3,
 		},
 	];
-	return( <div className="container mx-auto py-10">
-    <div className="flex flex-col items-center gap-10">
-			<div className='w-full max-w-4xl'><ProfileCard user={userData} /></div>
-      
+	return (
+		<div className="container mx-auto py-10 px-4 sm:px-6">
+			<div className="flex flex-col items-center gap-10">
+				<div className="w-full max-w-4xl">
+					<ProfileCard user={userData} />
+				</div>
 			</div>
 			<div className="container mx-auto flex flex-col items-center py-10">
 				<h3 className="text-bold text-4xl pb-6 text-center">Umfragen, die du erstellt hast</h3>
@@ -46,6 +46,6 @@ export default async function ProfilePage() {
 					<PastSurveys surveys={surveysData} />
 				</div>
 			</div>
-			</div>
+		</div>
 	);
 }

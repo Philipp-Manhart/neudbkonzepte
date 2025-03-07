@@ -44,7 +44,7 @@ export default async function EditProfilePage() {
 	}
 
 	return (
-		<div className="container mx-auto py-10">
+		<div className="container mx-auto py-10 px-4 sm:px-6">
 			<EditProfileForm initialData={userData} action={handleSubmit} />
 		</div>
 	);

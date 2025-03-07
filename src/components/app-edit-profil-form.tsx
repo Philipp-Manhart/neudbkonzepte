@@ -46,7 +46,7 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 								const confirmPassword = formData.get('confirmPassword') as string;
 
 								if (password !== confirmPassword) {
-									setErrors({ password: "Passwörter stimmen nicht überein" });
+									setErrors({ password: 'Passwörter stimmen nicht überein' });
 									return;
 								}
 							}
@@ -61,7 +61,7 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 
 								if (result?.success) {
 									setErrors({});
-									router.push('/profil');
+									router.push('/profile');
 								}
 							} catch (err) {
 								console.log(err);
@@ -75,7 +75,7 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 					)}
 					<div className="grid grid-cols-2 gap-8">
 						<div className="space-y-3">
-							<Label htmlFor="first_name">first_name</Label>
+							<Label htmlFor="first_name">Vorname</Label>
 							<Input
 								id="first_name"
 								value={formData.first_name}
@@ -87,7 +87,7 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 							{errors.first_name && <p className="text-sm text-destructive mt-2">{errors.first_name}</p>}
 						</div>
 						<div className="space-y-3">
-							<Label htmlFor="surname">surname</Label>
+							<Label htmlFor="surname">Nachname</Label>
 							<Input
 								id="surname"
 								value={formData.surname}

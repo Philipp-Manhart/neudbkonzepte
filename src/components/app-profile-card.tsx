@@ -19,17 +19,14 @@ export function ProfileCard({ user }: ProfileCardProps) {
 		<Card className="w-full max-w-3xl">
 			<CardHeader className="pb-8">
 				<div className="flex justify-between items-start w-full">
-					<div className="flex items-center space-x-6">
-						<div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-							<span className="text-4xl">{user.first_name[0]}</span>
-						</div>
+					<div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
 						<div>
 							<h2 className="text-3xl font-bold">
 								{user.first_name} {user.surname}
 							</h2>
 						</div>
 					</div>
-					<Button variant="outline" size="icon" onClick={() => router.push(`/profil/bearbeiten`)}>
+					<Button variant="outline" size="icon" onClick={() => router.push(`/profile/edit`)}>
 						<PencilIcon className="h-4 w-4" />
 					</Button>
 				</div>
@@ -48,8 +45,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 					<p className="text-lg">{user.email}</p>
 				</div>
 			</CardContent>
-			<CardFooter>
-			</CardFooter>
+			<CardFooter></CardFooter>
 		</Card>
 	);
 }
