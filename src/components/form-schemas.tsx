@@ -18,6 +18,10 @@ export const SignupFormSchema = z.object({
 });
 
 export const SigninFormSchema = z.object({
-  email: z.string().email({ message: 'Gib eine valide E-Mail Adresse ein' }).trim(),
-  password: z.string().min(8, { message: 'Muss mindestens 8 Zeichen lang sein.' }).trim(),
+	email: z.string().email({ message: 'Gib eine valide E-Mail Adresse ein' }).trim(),
+	password: z.string().min(8, { message: 'Muss mindestens 8 Zeichen lang sein.' }).trim(),
+});
+
+export const EnterPollFormSchema = z.object({
+	pollId: z.string().min(6, { message: 'Die AbstimmungsID besteht aus 6 Ziffern' }).trim(),
 });

@@ -14,7 +14,7 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 	const userExists = await redis.exists(emailKey);
 
 	if (userExists) {
-		return { success: false, error: 'User with this email already exists' };
+		return { success: false, error: 'Nutzer mit dieser E-Mail existiert bereits' };
 	} else {
 		const userId = `user:${uniqueId}`;
 		const hashedPassword = await bcrypt.hash(password, 10);
