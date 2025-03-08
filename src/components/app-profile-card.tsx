@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 interface ProfileCardProps {
 	user: {
 		first_name: string;
-		surname: string;
+		last_name: string;
 		email: string;
 	};
 }
@@ -22,7 +22,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 					<div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
 						<div>
 							<h2 className="text-3xl font-bold">
-								{user.first_name} {user.surname}
+								{user.first_name} {user.last_name}
 							</h2>
 						</div>
 					</div>
@@ -38,7 +38,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
 				</div>
 				<div>
 					<label className="text-base font-medium text-muted-foreground">Nachname</label>
-					<p className="text-lg">{user.surname}</p>
+					<p className="text-lg">{user.last_name}</p>
 				</div>
 				<div>
 					<label className="text-base font-medium text-muted-foreground">E-Mail</label>

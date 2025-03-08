@@ -22,7 +22,7 @@ export const registerSchema = z.object({
 		.string()
 		.min(2, 'Vorname muss mindestens 2 Zeichen lang sein')
 		.max(50, 'Vorname darf nicht länger als 50 Zeichen sein'),
-	surname: z
+	last_name: z
 		.string()
 		.min(2, 'Nachname muss mindestens 2 Zeichen lang sein')
 		.max(50, 'Nachname darf nicht länger als 50 Zeichen sein'),
@@ -43,11 +43,10 @@ export const editSchema = z.object({
 		.string()
 		.min(2, 'Vorname muss mindestens 2 Zeichen lang sein')
 		.max(50, 'Vorname darf nicht länger als 50 Zeichen sein'),
-	surname: z
+	last_name: z
 		.string()
 		.min(2, 'Nachname muss mindestens 2 Zeichen lang sein')
 		.max(50, 'Nachname darf nicht länger als 50 Zeichen sein'),
 });
 
 export type editSchema = z.infer<typeof editSchema>;
-

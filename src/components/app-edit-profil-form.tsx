@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 interface EditProfileFormProps {
 	initialData?: {
 		first_name: string;
-		surname: string;
+		last_name: string;
 		email: string;
 	};
 	action: (formData: FormData) => Promise<{
@@ -26,7 +26,7 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [formData, setFormData] = useState({
 		first_name: initialData?.first_name || '',
-		surname: initialData?.surname || '',
+		last_name: initialData?.last_name || '',
 		email: initialData?.email || '',
 		password: '',
 		confirmPassword: '',
@@ -87,16 +87,16 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 							{errors.first_name && <p className="text-sm text-destructive mt-2">{errors.first_name}</p>}
 						</div>
 						<div className="space-y-3">
-							<Label htmlFor="surname">Nachname</Label>
+							<Label htmlFor="last_name">Nachname</Label>
 							<Input
-								id="surname"
-								value={formData.surname}
-								onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+								id="last_name"
+								value={formData.last_name}
+								onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
 								disabled={isPending}
 								required
-								name="surname"
+								name="last_name"
 							/>
-							{errors.surname && <p className="text-sm text-destructive mt-2">{errors.surname}</p>}
+							{errors.last_name && <p className="text-sm text-destructive mt-2">{errors.last_name}</p>}
 						</div>
 					</div>
 					<div className="space-y-3">

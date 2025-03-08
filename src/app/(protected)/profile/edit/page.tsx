@@ -2,10 +2,9 @@ import { EditProfileForm } from '@/components/app-edit-profil-form';
 import { editSchema } from '@/lib/zod';
 
 export default async function EditProfilePage() {
-
 	const userData = {
 		first_name: 'Gabriel',
-		surname: 'Jung',
+		last_name: 'Jung',
 		email: 'test@test.com',
 	};
 
@@ -16,7 +15,7 @@ export default async function EditProfilePage() {
 			const data = {
 				email: formData.get('email')?.toString(),
 				first_name: formData.get('first_name')?.toString(),
-				surname: formData.get('surname')?.toString(),
+				last_name: formData.get('last_name')?.toString(),
 				password: formData.get('password')?.toString() || undefined,
 			};
 
@@ -30,7 +29,7 @@ export default async function EditProfilePage() {
 				return { error: errors };
 			}
 
-      //Hier Profil Updaten
+			//Hier Profil Updaten
 			/* await updateProfile({
 				nutzer_id: parseInt(session?.user?.id as string),
 				...validatedFields.data,
