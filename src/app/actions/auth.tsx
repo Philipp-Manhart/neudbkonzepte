@@ -5,6 +5,7 @@ import { createSession, deleteSession } from '@/lib/session';
 import { nanoid } from 'nanoid';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
+import { cookies } from 'next/headers';
 
 export async function signupAuthenticated(first_name: string, last_name: string, email: string, password: string) {
 	const type = 'authenticated';
@@ -64,7 +65,16 @@ export async function login(email: string, password: string) {
 
 	if (passwordMatch) {
 		await createSession(userId);
-		redirect('/dashboard');
+
+		const cookieStore = cookies();
+		const redirectUrl = (await cookieStore).get('redirectUrl')?.value;
+
+		if (redirectUrl) {
+			(await cookieStore).delete('redirectUrl');
+			redirect(redirectUrl);
+		} else {
+			redirect('/dashboard');
+		}
 	} else {
 		return { success: false, error: 'Invalid email or password' };
 	}
