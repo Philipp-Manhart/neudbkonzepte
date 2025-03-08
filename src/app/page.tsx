@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import EnterPollForm from '@/components/enter-poll-form';
 import { User } from 'lucide-react';
@@ -17,12 +17,14 @@ export default function Home() {
 			</div>
 
 			<div className="flex flex-col items-center justify-center min-h-screen">
-				<Card className="max-w-md w-full py-6 px-4">
+				<Card className="max-w-md w-full">
 					<CardHeader>
 						<CardTitle>Abstimmung beitreten</CardTitle>
 						<CardDescription>Geben Sie die Abstimmungs-ID ein</CardDescription>
 					</CardHeader>
-					<EnterPollForm />
+					<CardContent>
+						<EnterPollForm />
+					</CardContent>
 				</Card>
 			</div>
 		</div>

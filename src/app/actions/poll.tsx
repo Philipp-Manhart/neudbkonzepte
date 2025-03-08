@@ -1,7 +1,7 @@
 'use server';
 
 import { redis } from '@/lib/redis';
-import { nanoid, customAlphabet } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 import { redirect } from 'next/navigation';
 
 export async function enterPoll(pollId: string) {
@@ -25,4 +25,21 @@ export async function createPoll(owner: string, name: string, description: strin
 		status,
 		defaultduration,
 	});
+	await redis.sAdd(`user:${owner}:polls`, pollId);
+}
+
+export async function getPoll(pollId: string) {
+	const poll = await redis.hGetAll(pollId);
+	if (!poll) {
+		return { success: false, error: 'Abstimmung nicht vorhanden' };
+	}
+	return poll;
+}
+
+export async function getPolls(userId: string) {
+	const polls = await redis.sMembers(`user:${userId}:polls`);
+	if (!polls) {
+		return { success: false, error: 'Keine Abstimmungen vorhanden' };
+	}
+	return polls;
 }

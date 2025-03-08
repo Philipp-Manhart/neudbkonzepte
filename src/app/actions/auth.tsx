@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 
+// Signup
 export async function signupAuthenticated(first_name: string, last_name: string, email: string, password: string) {
 	const type = 'authenticated';
 	const uniqueId = nanoid();
@@ -48,6 +49,7 @@ export async function signupAnonymous() {
 	redirect('/dashboard');
 }
 
+// Login / Logout
 export async function login(email: string, password: string) {
 	const userId = await redis.get(`user:email:${email}`);
 
@@ -83,4 +85,25 @@ export async function login(email: string, password: string) {
 export async function logout() {
 	await deleteSession();
 	redirect('/login');
+}
+
+// Change Password
+
+export async function changePassword(userId: string, confirmation_password: string, new_password: string) {
+	const password = await redis.hGet(userId, 'password');
+
+	if (!password) {
+		return { success: false, error: 'Nutzer Password nicht gefunden' };
+	}
+
+	const passwordMatch = await bcrypt.compare(confirmation_password, password);
+
+	if (passwordMatch) {
+		const hashedPassword = await bcrypt.hash(new_password, 10);
+		await redis.hSet(userId, {
+			password: hashedPassword,
+		});
+		return { success: true };
+	}
+	return { success: false, error: 'Überprüfe dein altes Password' };
 }

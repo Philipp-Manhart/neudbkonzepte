@@ -23,5 +23,5 @@ export const SigninFormSchema = z.object({
 });
 
 export const EnterPollFormSchema = z.object({
-	pollId: z.string().min(6, { message: 'Die AbstimmungsID besteht aus 6 Ziffern' }).trim(),
+	pollId: z.string().length(6, { message: 'Die AbstimmungsID besteht aus 6 Ziffern' }).trim(),
 });
