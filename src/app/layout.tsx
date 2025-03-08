@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
+import { UserProvider } from '@/lib/user-provider';
+import { getSession } from '@/lib/session';
+import { AuthToggle } from '@/components/auth-toggle';
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -23,11 +26,22 @@ export default async function RootLayout({
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const session = await getSession();
+	const isAuthenticated = !!session?.userId;
 	return (
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
-				<div className="m-4">{children}</div>
-				<Toaster />
+				<UserProvider initialUser={session?.userId}>
+					<div className="m-4">
+						<header>
+							<div className="flex justify-end">
+								<AuthToggle isAuthenticated={isAuthenticated} />
+							</div>
+						</header>
+						<main>{children}</main>
+					</div>
+					<Toaster />
+				</UserProvider>
 			</body>
 		</html>
 	);
