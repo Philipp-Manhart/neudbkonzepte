@@ -16,10 +16,10 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 	if (userExists) {
 		return { success: false, error: 'User with this email already exists' };
 	} else {
-		const userKey = `user:${uniqueId}`;
+		const userId = `user:${uniqueId}`;
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		await redis.hSet(userKey, {
+		await redis.hSet(userId, {
 			type,
 			first_name,
 			last_name,
@@ -30,7 +30,7 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 		await redis.set(emailKey, uniqueId);
 
 		await createSession(uniqueId);
-		redirect('/test');
+		redirect('/dashboard');
 	}
 }
 
@@ -38,13 +38,13 @@ export async function signupAnonymous() {
 	const type = 'anonymous';
 	const uniqueId = nanoid();
 
-	const userKey = `user:${uniqueId}`;
-	await redis.hSet(userKey, {
+	const userId = `user:${uniqueId}`;
+	await redis.hSet(userId, {
 		type,
 	});
 
 	await createSession(uniqueId);
-	redirect('/test');
+	redirect('/dashboard');
 }
 
 export async function login(email: string, password: string) {
@@ -64,7 +64,7 @@ export async function login(email: string, password: string) {
 
 	if (passwordMatch) {
 		await createSession(userId);
-		redirect('/test');
+		redirect('/dashboard');
 	} else {
 		return { success: false, error: 'Invalid email or password' };
 	}

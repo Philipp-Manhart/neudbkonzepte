@@ -1,5 +1,5 @@
 import 'server-only';
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 import { cookies } from 'next/headers';
 import { Session } from './definitions';
 
@@ -24,12 +24,18 @@ export async function refreshSession(userId: string) {
 	await createSession(userId);
 }
 
+export async function getSession() {
+	const cookie = (await cookies()).get('session')?.value;
+	const session = await decrypt(cookie);
+	return session;
+}
+
 export async function deleteSession() {
 	(await cookies()).delete('session');
 }
 
 export async function encrypt(payload: Session) {
-	return new SignJWT(payload as any)
+	return new SignJWT(payload as unknown as JWTPayload)
 		.setProtectedHeader({ alg: 'HS256' })
 		.setIssuedAt()
 		.setExpirationTime('10m')
