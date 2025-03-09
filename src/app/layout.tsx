@@ -5,6 +5,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { UserProvider } from '@/lib/user-provider';
 import { getSession } from '@/lib/session';
 import { AuthToggle } from '@/components/auth-toggle';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/app-sidebar';
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -31,17 +33,24 @@ export default async function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
-				<UserProvider initialUser={session?.userId}>
-					<div className="m-4">
-						<header>
-							<div className="flex justify-end">
-								<AuthToggle isAuthenticated={isAuthenticated} />
+				<SidebarProvider>
+					<AppSidebar />
+					<SidebarInset>
+						<UserProvider initialUser={session?.userId}>
+							<div className="m-4">
+								<header>
+									<div className="flex justify-between items-center">
+										<SidebarTrigger />
+
+										<AuthToggle isAuthenticated={isAuthenticated} />
+									</div>
+								</header>
+								<main>{children}</main>
 							</div>
-						</header>
-						<main>{children}</main>
-					</div>
-					<Toaster />
-				</UserProvider>
+							<Toaster />
+						</UserProvider>
+					</SidebarInset>
+				</SidebarProvider>
 			</body>
 		</html>
 	);
