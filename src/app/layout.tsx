@@ -7,6 +7,10 @@ import { getSession } from '@/lib/session';
 import { AuthToggle } from '@/components/auth-toggle';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/app-sidebar';
+import { ThemeProvider } from '@/components/theme-provider';
+import { ModeToggle } from '@/components/app-mode-toggle';
+import { useSession } from 'next-auth/react'; // Or your auth library
+
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -29,27 +33,31 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const session = await getSession();
-	const isAuthenticated = !!session?.userId;
+	const isLoggedIn = !!session?.userId;
+	
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
-				<SidebarProvider>
-					<AppSidebar />
-					<SidebarInset>
-						<UserProvider initialUser={session?.userId}>
-							<div className="m-4">
-								<header>
-									<div className="flex justify-between items-center">
+				<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+					<SidebarProvider>
+						<AppSidebar />
+						<SidebarInset>
+							<UserProvider initialUser={session?.userId}>
+								<div className="m-4">
+									<header className="flex justify-between items-center">
 										<SidebarTrigger />
-										<AuthToggle isAuthenticated={isAuthenticated} />
-									</div>
-								</header>
-								<main>{children}</main>
-							</div>
-							<Toaster />
-						</UserProvider>
-					</SidebarInset>
-				</SidebarProvider>
+										<div className="flex justify-between items-center gap-4">
+											<AuthToggle isLoggedIn={isLoggedIn} />
+											<ModeToggle />
+										</div>
+									</header>
+									<main>{children}</main>
+								</div>
+								<Toaster />
+							</UserProvider>
+						</SidebarInset>
+					</SidebarProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);

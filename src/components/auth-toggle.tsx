@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { logout } from '@/app/actions/auth';
 
-export function AuthToggle({ isAuthenticated }: { isAuthenticated: boolean }) {
+export function AuthToggle({ isLoggedIn }: { isLoggedIn: boolean }) {
 	const router = useRouter();
 
 	const handleLogin = () => {
@@ -17,9 +17,11 @@ export function AuthToggle({ isAuthenticated }: { isAuthenticated: boolean }) {
 	};
 
 	return (
-		<Button variant="ghost" onClick={isAuthenticated ? handleLogout : handleLogin}>
-			{isAuthenticated ? <LogOut className="mr-2 h-4 w-4" /> : <LogIn className="mr-2 h-4 w-4" />}
-			{isAuthenticated ? 'Logout' : 'Login'}
+		<Button variant="ghost" onClick={isLoggedIn ? handleLogout : handleLogin}>
+			{isLoggedIn ? <LogOut className="mr-2 h-4 w-4" /> : <LogIn className="mr-2 h-4 w-4" />}
+			{isLoggedIn ? 'Logout' : 'Login'}
 		</Button>
 	);
 }
+
+
