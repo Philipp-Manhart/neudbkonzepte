@@ -10,7 +10,6 @@ import { login } from '@/app/actions/auth';
 import { useState } from 'react';
 import { SigninFormSchema } from '@/components/form-schemas';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { toast } from 'sonner';
 
 export default function SigninForm() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,11 +30,7 @@ export default function SigninForm() {
 
 		if (result && !result.success) {
 			setError(result.error);
-			toast.success('Anmeldung fehlgeschlagen');
-		} else {
-			toast.error('Anmeldung erfolgreich.');
 		}
-
 		setIsSubmitting(false);
 	}
 

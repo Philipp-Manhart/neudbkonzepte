@@ -32,7 +32,6 @@ export default function SignupForm() {
 
 		if (result && !result.success) {
 			setError(result.error);
-			console.log('Signup error:', result.error);
 		}
 
 		setIsSubmitting(false);
