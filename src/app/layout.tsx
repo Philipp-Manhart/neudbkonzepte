@@ -32,28 +32,42 @@ export default async function RootLayout({
 }>) {
 	const session = await getSession();
 	const isLoggedIn = !!session?.userId;
+	const isAuthenticated = session?.userType === 'authenticated';
 
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
 				<UserProvider userId={session?.userId} userType={session?.userType}>
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-						<SidebarProvider>
-							<AppSidebar />
-							<SidebarInset>
-								<div className="m-4">
-									<header className="flex justify-between items-center">
-										<SidebarTrigger />
-										<div className="flex justify-between items-center gap-4">
-											<AuthToggle isLoggedIn={isLoggedIn} />
-											<ModeToggle />
-										</div>
-									</header>
-									<main>{children}</main>
-								</div>
-								<Toaster />
-							</SidebarInset>
-						</SidebarProvider>
+						{isAuthenticated ? (
+							<SidebarProvider>
+								<AppSidebar />
+								<SidebarInset>
+									<div className="m-4">
+										<header className="flex justify-between items-center">
+											<SidebarTrigger />
+											<div className="flex justify-between items-center gap-4">
+												<AuthToggle isLoggedIn={isLoggedIn} />
+												<ModeToggle />
+											</div>
+										</header>
+										<main>{children}</main>
+									</div>
+								</SidebarInset>
+							</SidebarProvider>
+						) : (
+							<div className="m-4">
+								<header className="flex justify-between items-center">
+									<div></div> {/* Empty div to maintain layout */}
+									<div className="flex justify-between items-center gap-4">
+										<AuthToggle isLoggedIn={isLoggedIn} />
+										<ModeToggle />
+									</div>
+								</header>
+								<main>{children}</main>
+							</div>
+						)}
+						<Toaster />
 					</ThemeProvider>
 				</UserProvider>
 			</body>
