@@ -1,5 +1,5 @@
 //Hier die ganzen Survey Cards mappen
-import { SurveyCard } from "./app-survey-profile-card";
+import { SurveyCard } from './app-survey-profile-card';
 
 interface PastSurveysProps {
 	surveys: {
@@ -11,7 +11,7 @@ interface PastSurveysProps {
 	onCreatedPage: boolean;
 }
 
-export function PastSurveys({ surveys, onCreatedPage }: PastSurveysProps) {
+export function CreatedSurveys({ surveys, onCreatedPage }: PastSurveysProps) {
 	return (
 		<>
 			{surveys.map((survey, index) => (
