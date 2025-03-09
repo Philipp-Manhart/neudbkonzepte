@@ -9,8 +9,6 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { AppSidebar } from '@/components/app-sidebar';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ModeToggle } from '@/components/app-mode-toggle';
-import { useSession } from 'next-auth/react'; // Or your auth library
-
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -34,15 +32,15 @@ export default async function RootLayout({
 }>) {
 	const session = await getSession();
 	const isLoggedIn = !!session?.userId;
-	
+
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${geistSans.variable} ${geistMono.variable} antialiased `}>
-				<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-					<SidebarProvider>
-						<AppSidebar />
-						<SidebarInset>
-							<UserProvider initialUser={session?.userId}>
+				<UserProvider userId={session?.userId} userType={session?.userType}>
+					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+						<SidebarProvider>
+							<AppSidebar />
+							<SidebarInset>
 								<div className="m-4">
 									<header className="flex justify-between items-center">
 										<SidebarTrigger />
@@ -54,10 +52,10 @@ export default async function RootLayout({
 									<main>{children}</main>
 								</div>
 								<Toaster />
-							</UserProvider>
-						</SidebarInset>
-					</SidebarProvider>
-				</ThemeProvider>
+							</SidebarInset>
+						</SidebarProvider>
+					</ThemeProvider>
+				</UserProvider>
 			</body>
 		</html>
 	);

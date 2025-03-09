@@ -2,10 +2,13 @@
 
 import { createContext, useContext } from 'react';
 
-// Create a context with undefined as default value
-export const UserContext = createContext<string | undefined>(undefined);
+export interface UserContextType {
+	userId?: string;
+	userType?: string;
+}
 
-// Custom hook to use the UserContext
+export const UserContext = createContext<UserContextType>({ userId: undefined, userType: undefined });
+
 export function useUser() {
 	return useContext(UserContext);
 }

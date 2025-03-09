@@ -1,15 +1,22 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { UserContext } from './context';
 
 interface UserProviderProps {
 	children: ReactNode;
-	initialUser?: string;
+	userId?: string;
+	userType?: string;
 }
 
-export function UserProvider({ children, initialUser }: UserProviderProps) {
-	const [user] = useState<string | undefined>(initialUser);
+export function UserProvider({ children, userId, userType }: UserProviderProps) {
+	const [userState, setUserState] = useState({
+		userId,
+		userType,
+	});
+	useEffect(() => {
+		setUserState({ userId, userType });
+	}, [userId, userType]);
 
-	return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+	return <UserContext.Provider value={userState}>{children}</UserContext.Provider>;
 }

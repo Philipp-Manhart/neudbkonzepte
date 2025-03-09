@@ -31,7 +31,7 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 
 		await redis.set(emailKey, uniqueId);
 
-		await createSession(uniqueId);
+		await createSession(uniqueId, type);
 		redirect('/dashboard');
 	}
 }
@@ -45,7 +45,7 @@ export async function signupAnonymous() {
 		type,
 	});
 
-	await createSession(uniqueId);
+	await createSession(uniqueId, type);
 	redirect('/dashboard');
 }
 
@@ -66,7 +66,7 @@ export async function login(email: string, password: string) {
 	const passwordMatch = await bcrypt.compare(password, user.password);
 
 	if (passwordMatch) {
-		await createSession(userId);
+		await createSession(userId, user.type);
 
 		const cookieStore = cookies();
 		const redirectUrl = (await cookieStore).get('redirectUrl')?.value;
