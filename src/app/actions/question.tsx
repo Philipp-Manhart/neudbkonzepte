@@ -6,13 +6,17 @@ export async function createQuestion(pollId: string, type: string, questionText:
 	const uniqueId = nanoid();
 	const questionKey = `question:${uniqueId}`;
 
-	await redis.hSet(questionKey, {
+	const multi = redis.multi();
+
+	multi.hSet(questionKey, {
 		type,
 		pollId,
 		questionText,
 		possibleAnswers: JSON.stringify(possibleAnswers),
 	});
-	await redis.sAdd(`poll:${pollId}:questions`, uniqueId);
+
+	multi.sAdd(`poll:${pollId}:questions`, uniqueId);
+	await multi.exec();
 }
 
 export async function getQuestion(questionId: string) {
@@ -46,6 +50,10 @@ export async function deleteQuestion(questionId: string) {
 	if (!question) {
 		return null;
 	}
-	await redis.del(questionKey);
-	await redis.sRem(`poll:${question.pollId}:questions`, questionId);
+
+	const multi = redis.multi();
+
+	multi.del(questionKey);
+	multi.sRem(`poll:${question.pollId}:questions`, questionId);
+	await multi.exec();
 }

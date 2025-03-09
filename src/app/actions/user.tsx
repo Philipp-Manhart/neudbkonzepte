@@ -14,14 +14,18 @@ export async function getUser(userId: string) {
 
 export async function updateUser(userId: string, first_name: string, last_name: string, email: string) {
 	const originalEmail = await redis.hGet(userId, 'email');
-	await redis.hSet(userId, {
+
+	const multi = redis.multi();
+	multi.hSet(userId, {
 		first_name,
 		last_name,
 		email,
 	});
 
 	if (originalEmail && email !== originalEmail) {
-		await redis.del(`user:email:${originalEmail}`);
-		await redis.set(`user:email:${email}`, userId);
+		multi.del(`user:email:${originalEmail}`);
+		multi.set(`user:email:${email}`, userId);
 	}
+
+	await multi.exec();
 }

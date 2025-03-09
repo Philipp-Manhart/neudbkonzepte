@@ -18,14 +18,17 @@ export async function createPoll(owner: string, name: string, description: strin
 	const pollId = `poll:${uniqueId}`;
 	const status = 'closed';
 
-	await redis.hSet(pollId, {
+	const multi = redis.multi();
+
+	multi.hSet(pollId, {
 		owner,
 		name,
 		description,
 		status,
 		defaultduration,
 	});
-	await redis.sAdd(`user:${owner}:polls`, pollId);
+	multi.sAdd(`user:${owner}:polls`, pollId);
+	await multi.exec();
 }
 
 export async function getPoll(pollId: string) {
@@ -36,10 +39,33 @@ export async function getPoll(pollId: string) {
 	return poll;
 }
 
-export async function getPolls(userId: string) {
+export async function getPollsByOwner(userId: string) {
 	const polls = await redis.sMembers(`user:${userId}:polls`);
 	if (!polls) {
 		return { success: false, error: 'Keine Abstimmungen vorhanden' };
 	}
 	return polls;
+}
+
+export async function deletePoll(pollId: string) {
+	const poll = await redis.hGetAll(pollId);
+	if (!Object.keys(poll).length) {
+		return { success: false, error: 'Abstimmung nicht vorhanden' };
+	}
+
+	const multi = redis.multi();
+
+	const questionIds = await redis.sMembers(`${pollId}:questions`);
+
+	for (const questionId of questionIds) {
+		const questionKey = `question:${questionId}`;
+		multi.del(questionKey);
+	}
+
+	multi.del(`${pollId}:questions`);
+	multi.del(pollId);
+	multi.sRem(`user:${poll.owner}:polls`, pollId);
+
+	await multi.exec();
+	return { success: true };
 }

@@ -21,15 +21,16 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 		const userId = `user:${uniqueId}`;
 		const hashedPassword = await bcrypt.hash(password, 10);
 
-		await redis.hSet(userId, {
+		const multi = redis.multi();
+		multi.hSet(userId, {
 			type,
 			first_name,
 			last_name,
 			email,
 			password: hashedPassword,
 		});
-
-		await redis.set(emailKey, uniqueId);
+		multi.set(emailKey, uniqueId);
+		await multi.exec();
 
 		await createSession(uniqueId, type);
 		redirect('/dashboard');
@@ -54,13 +55,13 @@ export async function login(email: string, password: string) {
 	const userId = await redis.get(`user:email:${email}`);
 
 	if (!userId) {
-		return { success: false, error: 'Invalid email or password' };
+		return { success: false, error: 'Ungültige E-Mail oder Passwort' };
 	}
 
 	const user = await redis.hGetAll(`user:${userId}`);
 
 	if (!user || Object.keys(user).length === 0) {
-		return { success: false, error: 'User data not found' };
+		return { success: false, error: 'Benutzerdaten nicht gefunden' };
 	}
 
 	const passwordMatch = await bcrypt.compare(password, user.password);
@@ -78,7 +79,7 @@ export async function login(email: string, password: string) {
 			redirect('/dashboard');
 		}
 	} else {
-		return { success: false, error: 'Invalid email or password' };
+		return { success: false, error: 'Ungültige E-Mail oder Passwort' };
 	}
 }
 
@@ -88,7 +89,6 @@ export async function logout() {
 }
 
 // Change Password
-
 export async function changePassword(userId: string, confirmation_password: string, new_password: string) {
 	const password = await redis.hGet(userId, 'password');
 

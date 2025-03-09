@@ -58,7 +58,7 @@ export default async function RootLayout({
 						) : (
 							<div className="m-4">
 								<header className="flex justify-between items-center">
-									<div></div> {/* Empty div to maintain layout */}
+									<div></div>
 									<div className="flex justify-between items-center gap-4">
 										<AuthToggle isLoggedIn={isLoggedIn} />
 										<ModeToggle />

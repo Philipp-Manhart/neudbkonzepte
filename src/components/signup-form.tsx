@@ -9,9 +9,11 @@ import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { signupAuthenticated } from '@/app/actions/auth';
 import { useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SignupForm() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 	const form = useForm<z.infer<typeof SignupFormSchema>>({
 		resolver: zodResolver(SignupFormSchema),
@@ -25,9 +27,11 @@ export default function SignupForm() {
 
 	async function onSubmit(values: z.infer<typeof SignupFormSchema>) {
 		setIsSubmitting(true);
+		setError(null);
 		const result = await signupAuthenticated(values.first_name, values.last_name, values.email, values.password);
 
 		if (result && !result.success) {
+			setError(result.error);
 			console.log('Signup error:', result.error);
 		}
 
@@ -37,6 +41,11 @@ export default function SignupForm() {
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+				{error && (
+					<Alert variant="destructive">
+						<AlertDescription>{error}</AlertDescription>
+					</Alert>
+				)}
 				<FormField
 					control={form.control}
 					name="first_name"
