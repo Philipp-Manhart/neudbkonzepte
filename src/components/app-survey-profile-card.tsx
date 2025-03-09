@@ -1,9 +1,8 @@
 'use client';
 
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { CalendarIcon, UsersIcon, BarChart2Icon } from 'lucide-react';
+import { CalendarIcon, UsersIcon, BarChart2Icon, PlayIcon, EditIcon } from 'lucide-react';
 import { Button } from './ui/button';
-
 
 interface SurveyCardProps {
 	survey: {
@@ -12,9 +11,10 @@ interface SurveyCardProps {
 		participantCount: number;
 		questionCount: number;
 	};
+	onCreatedPage: boolean;
 }
 
-export function SurveyCard({ survey }: SurveyCardProps) {
+export function SurveyCard({ survey, onCreatedPage }: SurveyCardProps) {
 	return (
 		<Card className="w-full max-w-3xl mb-4">
 			<CardHeader>
@@ -41,11 +41,24 @@ export function SurveyCard({ survey }: SurveyCardProps) {
 					<p className="text-lg">{survey.questionCount}</p>
 				</div>
 			</CardContent>
-			<CardFooter className="flex justify-end pt-2">
-				<Button className="flex items-center gap-2">
-					<BarChart2Icon className="h-4 w-4" />
-					Ergebnisse anschauen
-				</Button>
+			<CardFooter className="flex justify-end pt-2 gap-2">
+				{onCreatedPage ? (
+					<>
+						<Button className="flex items-center gap-2">
+							<PlayIcon className="h-4 w-4" />
+							Umfrage Durchführen
+						</Button>
+						<Button variant="outline" className="flex items-center gap-2">
+							<EditIcon className="h-4 w-4" />
+							Umfrage bearbeiten
+						</Button>
+					</>
+				) : (
+					<Button className="flex items-center gap-2">
+						<BarChart2Icon className="h-4 w-4" />
+						Ergebnisse anschauen
+					</Button>
+				)}
 			</CardFooter>
 		</Card>
 	);

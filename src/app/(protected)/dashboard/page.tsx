@@ -28,6 +28,8 @@ const surveysData = [
 	},
 ];
 
+//TODO hier die Umfragen fetchen, die man durchgeführt hat (jeder Durchgang einzeln)
+
 export default function Dashboard() {
 	return (
 		<div className="flex flex-col items-center pt-[25vh]">
@@ -37,9 +39,9 @@ export default function Dashboard() {
 
 			<ExampleClientComponent />
 			<div className="container mx-auto flex flex-col items-center py-10">
-				<h3 className="text-bold text-4xl pb-6 text-center">Umfragen, die du erstellt hast</h3>
+				<h3 className="text-bold text-4xl pb-6 text-center">Umfragen, die du durchgeführt hast</h3>
 				<div className="w-full max-w-4xl">
-					<PastSurveys surveys={surveysData} />
+					<PastSurveys onCreatedPage={false} surveys={surveysData} />
 				</div>
 			</div>
 		</div>
