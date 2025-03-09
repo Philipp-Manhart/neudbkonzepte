@@ -41,7 +41,6 @@ export default async function RootLayout({
 								<header>
 									<div className="flex justify-between items-center">
 										<SidebarTrigger />
-
 										<AuthToggle isAuthenticated={isAuthenticated} />
 									</div>
 								</header>
