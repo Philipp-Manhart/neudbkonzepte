@@ -1,5 +1,5 @@
 'use server';
-
+// enter und create überarbeiten wegen poll_run
 import { redis } from '@/lib/redis';
 import { customAlphabet } from 'nanoid';
 import { redirect } from 'next/navigation';

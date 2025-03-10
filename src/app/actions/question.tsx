@@ -2,17 +2,17 @@
 import { redis } from '@/lib/redis';
 import { nanoid } from 'nanoid';
 
-export async function createQuestion(pollId: string, type: string, questionText: string, possibleAnswers: string[]) {
+export async function createQuestion(pollId: string, type: string, questionText: string, possibleAnswers?: string[]) {
 	const uniqueId = nanoid();
 	const questionKey = `question:${uniqueId}`;
 
 	const multi = redis.multi();
 
 	multi.hSet(questionKey, {
-		type,
+		type, // 'single' | 'multiple' | 'yes/no' | 'scale'
 		pollId,
 		questionText,
-		possibleAnswers: JSON.stringify(possibleAnswers),
+		possibleAnswers: JSON.stringify(possibleAnswers), // only for 'single' and 'multiple'
 	});
 
 	const timestamp = Date.now();
