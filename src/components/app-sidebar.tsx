@@ -25,13 +25,13 @@ const enterPoll = {
 };
 const myPolls = {
 	title: 'Meine Abstimmungen',
-	url: '/',
+	url: '/my-polls',
 	icon: Library,
 };
 
 const createPoll = {
 	title: 'Abstimmung erstellen',
-	url: '/',
+	url: '/create',
 	icon: FilePlus,
 };
 const myParticipations = {
