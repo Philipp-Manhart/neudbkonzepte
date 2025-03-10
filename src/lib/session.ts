@@ -48,8 +48,8 @@ export async function decrypt(session: string | undefined = ''): Promise<Session
 			algorithms: ['HS256'],
 		});
 		return payload as unknown as Session;
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	} catch (error) {
-		console.log('Failed to verify session: ' + error);
 		return undefined;
 	}
 }

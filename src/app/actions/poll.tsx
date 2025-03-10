@@ -27,7 +27,8 @@ export async function createPoll(owner: string, name: string, description: strin
 		status,
 		defaultduration,
 	});
-	multi.sAdd(`user:${owner}:polls`, pollId);
+	const timestamp = Date.now();
+	multi.zAdd(`user:${owner}:polls`, { score: timestamp, value: pollId });
 	await multi.exec();
 }
 
@@ -40,10 +41,26 @@ export async function getPoll(pollId: string) {
 }
 
 export async function getPollsByOwner(userId: string) {
-	const polls = await redis.sMembers(`user:${userId}:polls`);
-	if (!polls) {
+	const pollIds = await redis.zRange(`user:${userId}:polls`, 0, -1, { REV: true });
+	if (!pollIds || pollIds.length === 0) {
 		return { success: false, error: 'Keine Abstimmungen vorhanden' };
 	}
+
+	const multi = redis.multi();
+
+	for (const pollId of pollIds) {
+		multi.hGetAll(pollId);
+	}
+
+	const pollsData = await multi.exec();
+	const polls = pollsData.map((result, index) => {
+		const pollData = result || {};
+		return {
+			id: pollIds[index].replace('poll:', ''),
+			...pollData,
+		};
+	});
+
 	return polls;
 }
 
@@ -55,8 +72,7 @@ export async function deletePoll(pollId: string) {
 
 	const multi = redis.multi();
 
-	const questionIds = await redis.sMembers(`${pollId}:questions`);
-
+	const questionIds = await redis.zRange(`${pollId}:questions`, 0, -1);
 	for (const questionId of questionIds) {
 		const questionKey = `question:${questionId}`;
 		multi.del(questionKey);
@@ -64,7 +80,7 @@ export async function deletePoll(pollId: string) {
 
 	multi.del(`${pollId}:questions`);
 	multi.del(pollId);
-	multi.sRem(`user:${poll.owner}:polls`, pollId);
+	multi.zRem(`user:${poll.owner}:polls`, pollId);
 
 	await multi.exec();
 	return { success: true };
