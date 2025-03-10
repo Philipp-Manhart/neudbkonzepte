@@ -12,7 +12,7 @@ export default async function middleware(req: NextRequest) {
 	const session = await getSession();
 
 	if (session?.userId) {
-		await refreshSession(session?.userId);
+		await refreshSession(session?.userId, session?.userType);
 
 		// Check if there's a saved redirect URL in cookies
 		const redirectUrl = req.cookies.get('redirectUrl')?.value;

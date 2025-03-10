@@ -23,5 +23,5 @@ export interface User {
 export interface Session {
 	userId: string;
 	expiresAt: Date;
-	userType?: string;
+	userType: string;
 }

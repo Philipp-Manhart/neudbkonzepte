@@ -8,7 +8,7 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 const SESSION_DURATION_MS = 10 * 60 * 1000; // 10 minutes
 
-export async function createSession(userId: string, userType?: string) {
+export async function createSession(userId: string, userType: string) {
 	const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
 	const session = await encrypt({ userId, expiresAt, userType });
 
@@ -20,7 +20,7 @@ export async function createSession(userId: string, userType?: string) {
 	});
 }
 
-export async function refreshSession(userId: string, userType?: string) {
+export async function refreshSession(userId: string, userType: string) {
 	await createSession(userId, userType);
 }
 
