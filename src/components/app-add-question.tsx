@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { MinusCircle, PlusCircle, X } from 'lucide-react';
 import { Alert, AlertDescription } from './ui/alert';
 
-type QuestionType = 'multiple-choice' | 'single-choice' | 'true-false' | 'scale';
+type QuestionType = 'multiple-choice' | 'single-choice' | 'yes-no' | 'scale';
 
 interface AddQuestionProps {
 	questionId: number;
@@ -79,7 +79,7 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 						<SelectContent>
 							<SelectItem value="multiple-choice">Multiple Choice</SelectItem>
 							<SelectItem value="single-choice">Single Choice</SelectItem>
-							<SelectItem value="true-false">Wahr oder Falsch</SelectItem>
+							<SelectItem value="yes-no">Ja / Nein</SelectItem>
 							<SelectItem value="scale">Skala</SelectItem>
 						</SelectContent>
 					</Select>

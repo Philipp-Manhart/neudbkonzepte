@@ -50,8 +50,8 @@ export default function CreatePage() {
 	}
 
 	return (
-		<div className="flex flex-col items-center gap-8 py-10 px-4">
-			<p className="text-5xl">Erstelle eine neue Umfrage.</p>
+		<div className="flex flex-col items-center gap-6">
+			<h1 className="text-3xl  font-semibold">Erstelle eine neue Umfrage:</h1>
 			<PollNameInput
 				defaultTime={defaultTime}
 				setDefaultTime={setDefaultTime}
@@ -62,7 +62,8 @@ export default function CreatePage() {
 				nameError={nameError}
 				descriptionError={descriptionError}
 			/>
-			<p className="text-3xl">Füge hier Fragen hinzu.</p>
+
+			<p className="text-2xl font-semibold">Füge Fragen hinzu:</p>
 			{questions.map((id) => (
 				<div key={id} className="w-full max-w-2xl">
 					<AddQuestion questionId={id} onRemove={removeQuestion} canRemove={questions.length > 1} />

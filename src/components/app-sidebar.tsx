@@ -36,7 +36,7 @@ const createPoll = {
 };
 const myParticipations = {
 	title: 'Meine Teilnahmen',
-	url: '/customers',
+	url: '/my-participations',
 	icon: Vote,
 };
 

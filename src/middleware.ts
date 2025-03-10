@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { refreshSession, getSession } from './lib/session';
 
-const protectedRoutes = ['/profile', '/dashboard', '/poll', '/profile/edit', '/create', '/my-polls'];
+const protectedRoutes = ['/profile', '/dashboard', '/poll', '/profile/edit', '/create', '/my-polls' , '/my-participations', '/polls/[id]'];
 const publicRoutes = ['/login'];
 
 export default async function middleware(req: NextRequest) {
