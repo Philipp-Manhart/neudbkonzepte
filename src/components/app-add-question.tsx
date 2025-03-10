@@ -54,14 +54,6 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 		return true;
 	};
 
-	const handleSaveQuestion = () => {
-		if (validateForm()) {
-			//TODO Frage speichern
-			//Oder vielleicht das speichern in den Parent Component?
-			//und dann halt alle auf einmal
-		}
-	};
-
 	return (
 		<Card className="w-full max-w-2xl relative">
 			{canRemove && (
@@ -82,7 +74,7 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 					<label className="text-sm font-medium mb-2 block">Fragentyp</label>
 					<Select onValueChange={(value: QuestionType) => setQuestionType(value)}>
 						<SelectTrigger className="w-full">
-							<SelectValue placeholder="Select question type" />
+							<SelectValue placeholder="Fragetyp auswählen" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="multiple-choice">Multiple Choice</SelectItem>
@@ -102,11 +94,11 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 						)}
 
 						<div>
-							<label className="text-sm font-medium mb-2 block">Question</label>
+							<label className="text-sm font-medium mb-2 block">Frage</label>
 							<textarea
 								className="w-full p-2 border rounded-md"
 								rows={3}
-								placeholder="Enter your question here"
+								placeholder="Gib hier deine Frage ein"
 								value={questionText}
 								onChange={(e) => setQuestionText(e.target.value)}
 							/>
@@ -139,10 +131,6 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 								</Button>
 							</div>
 						)}
-
-						<Button className="w-full" onClick={handleSaveQuestion}>
-							Frage Speichern
-						</Button>
 					</div>
 				)}
 			</CardContent>
