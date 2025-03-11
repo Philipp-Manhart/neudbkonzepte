@@ -11,6 +11,7 @@ export default function ProfilePage() {
 
 	useEffect(() => {
 		async function getUserInfo() {
+			console.log('userId', userId);
 			const user = await getUser(userId as string);
 			console.log(user);
 			//hier sind die werte immer null

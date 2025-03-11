@@ -2,9 +2,10 @@
 import { redis } from '@/lib/redis';
 
 export async function getUser(userId: string) {
-	const first_name = await redis.hGet(userId, 'first_name');
-	const last_name = await redis.hGet(userId, 'last_name');
-	const email = await redis.hGet(userId, 'email');
+	const userKey = `user:${userId}`;
+	const first_name = await redis.hGet(userKey, 'first_name');
+	const last_name = await redis.hGet(userKey, 'last_name');
+	const email = await redis.hGet(userKey, 'email');
 	return {
 		first_name,
 		last_name,
