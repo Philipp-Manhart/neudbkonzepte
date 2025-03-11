@@ -29,8 +29,14 @@ export async function createPoll(owner: string, name: string, description: strin
 	});
 	const timestamp = Date.now();
 	multi.zAdd(`user:${owner}:polls`, { score: timestamp, value: pollId });
-	await multi.exec();
-	//Hier bitte die PollID returnen
+
+	try {
+		await multi.exec();
+		const poll = await getPoll(pollId);
+		return { success: true, id: uniqueId, poll };
+	} catch (error) {
+		return { success: false, error: 'Failed to create poll' };
+	}
 }
 
 export async function getPoll(pollId: string) {
