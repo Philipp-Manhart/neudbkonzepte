@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
-import { enterPoll } from '@/app/actions/poll';
+import { enterPollRun } from '@/app/actions/poll_run';
 import { useState } from 'react';
 import { EnterPollFormSchema } from '@/components/form-schemas';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -26,7 +26,7 @@ export default function EnterPollForm() {
 	async function onSubmit(values: z.infer<typeof EnterPollFormSchema>) {
 		setIsSubmitting(true);
 		setError(null);
-		const result = await enterPoll(values.pollId);
+		const result = await enterPollRun(values.pollId);
 		if (result && !result.success) {
 			setError(result.error);
 			toast.error('Abstimmung beitreten fehlgeschlagen');
