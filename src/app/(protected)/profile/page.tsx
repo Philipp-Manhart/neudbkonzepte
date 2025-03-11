@@ -11,10 +11,7 @@ export default function ProfilePage() {
 
 	useEffect(() => {
 		async function getUserInfo() {
-			console.log('userId', userId);
 			const user = await getUser(userId as string);
-			console.log(user);
-			//hier sind die werte immer null
 			setUser(user as User);
 		}
 		getUserInfo();
@@ -25,12 +22,8 @@ export default function ProfilePage() {
 	}
 
 	return (
-		<div className="container mx-auto py-10 px-4 sm:px-6">
-			<div className="flex flex-col items-center gap-10">
-				<div className="w-full max-w-4xl">
-					<ProfileCard user={user as User} />
-				</div>
-			</div>
+		<div className="flex flex-col items-center w-full">
+			<ProfileCard user={user as User} />
 		</div>
 	);
 }
