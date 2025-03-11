@@ -26,13 +26,13 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const session = await getSession();
-	const isLoggedIn = !!session?.userId;
+	const isLoggedIn = !!session?.userKey;
 	const isAuthenticated = session?.userType === 'authenticated';
 
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body className={`${inter.className} antialiased`}>
-				<UserProvider userId={session?.userId} userType={session?.userType}>
+				<UserProvider userKey={session?.userKey} userType={session?.userType}>
 					<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
 						{isAuthenticated ? (
 							<SidebarProvider>

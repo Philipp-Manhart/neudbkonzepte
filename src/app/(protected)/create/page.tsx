@@ -20,7 +20,7 @@ interface QuestionData {
 }
 
 export default function CreatePage() {
-	const { userId } = useUser();
+	const { userKey } = useUser();
 	const router = useRouter();
 	const [defaultTime, setDefaultTime] = useState([60]);
 	const [description, setDescription] = useState('');
@@ -38,8 +38,7 @@ export default function CreatePage() {
 	]);
 
 	const validateForm = () => {
-
-		let isValid= true;
+		let isValid = true;
 		let updatedQuestions = [...questions];
 
 		setNameError('');
@@ -66,15 +65,15 @@ export default function CreatePage() {
 
 			return { ...question, error: questionError };
 		});
-		
+
 		if (!pollName.trim()) {
 			setNameError('Bitte gib einen Namen für die Umfrage ein.');
-			isValid= false;
+			isValid = false;
 		}
 
 		if (!description.trim()) {
 			setDescriptionError('Bitte gib eine Beschreibung für die Umfrage ein.');
-			isValid= false;
+			isValid = false;
 		}
 
 		setQuestions(updatedQuestions);
@@ -107,7 +106,7 @@ export default function CreatePage() {
 		const isValid = validateForm();
 
 		if (isValid) {
-			const newPoll = await createPoll(userId as string, pollName, description, defaultTime[0].toString());
+			const newPoll = await createPoll(userKey as string, pollName, description, defaultTime[0].toString());
 
 			for (const question of questions) {
 				if (question.type) {
@@ -117,7 +116,6 @@ export default function CreatePage() {
 			router.push('/dashboard');
 		}
 	}
-
 
 	return (
 		<div className="flex flex-col items-center gap-6">

@@ -13,7 +13,7 @@ export type FormState =
 export type UserType = 'authenticated' | 'anonymous';
 
 export interface User {
-	id: string;
+	key: string;
 	type: UserType;
 	first_name?: string;
 	last_name?: string;
@@ -21,7 +21,7 @@ export interface User {
 }
 
 export interface Session {
-	userId: string;
+	userKey: string;
 	expiresAt: Date;
 	userType: string;
 }

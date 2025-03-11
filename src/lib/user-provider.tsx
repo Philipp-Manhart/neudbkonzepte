@@ -5,18 +5,18 @@ import { UserContext } from './context';
 
 interface UserProviderProps {
 	children: ReactNode;
-	userId?: string;
+	userKey?: string;
 	userType?: string;
 }
 
-export function UserProvider({ children, userId, userType }: UserProviderProps) {
+export function UserProvider({ children, userKey, userType }: UserProviderProps) {
 	const [userState, setUserState] = useState({
-		userId,
+		userKey,
 		userType,
 	});
 	useEffect(() => {
-		setUserState({ userId, userType });
-	}, [userId, userType]);
+		setUserState({ userKey, userType });
+	}, [userKey, userType]);
 
 	return <UserContext.Provider value={userState}>{children}</UserContext.Provider>;
 }

@@ -11,6 +11,7 @@ import { cookies } from 'next/headers';
 export async function signupAuthenticated(first_name: string, last_name: string, email: string, password: string) {
 	const type = 'authenticated';
 	const uniqueId = nanoid();
+	const userKey = `user:${uniqueId}`;
 
 	const emailKey = `user:email:${email}`;
 	const userExists = await redis.exists(emailKey);
@@ -18,21 +19,21 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 	if (userExists) {
 		return { success: false, error: 'Nutzer mit dieser E-Mail existiert bereits' };
 	} else {
-		const userId = `user:${uniqueId}`;
 		const hashedPassword = await bcrypt.hash(password, 10);
 
 		const multi = redis.multi();
-		multi.hSet(userId, {
+		multi.hSet(userKey, {
 			type,
 			first_name,
 			last_name,
 			email,
 			password: hashedPassword,
 		});
-		multi.set(emailKey, uniqueId);
+		// Store the complete userKey in the email index
+		multi.set(emailKey, userKey);
 		await multi.exec();
 
-		await createSession(uniqueId, type);
+		await createSession(userKey, type);
 		redirect('/dashboard');
 	}
 }
@@ -40,25 +41,25 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 export async function signupAnonymous() {
 	const type = 'anonymous';
 	const uniqueId = nanoid();
+	const userKey = `user:${uniqueId}`;
 
-	const userId = `user:${uniqueId}`;
-	await redis.hSet(userId, {
+	await redis.hSet(userKey, {
 		type,
 	});
 
-	await createSession(uniqueId, type);
+	await createSession(userKey, type);
 	redirect('/dashboard');
 }
 
 // Login / Logout
 export async function login(email: string, password: string) {
-	const userId = await redis.get(`user:email:${email}`);
+	const userKey = await redis.get(`user:email:${email}`);
 
-	if (!userId) {
+	if (!userKey) {
 		return { success: false, error: 'Ungültige E-Mail oder Passwort' };
 	}
 
-	const user = await redis.hGetAll(`user:${userId}`);
+	const user = await redis.hGetAll(userKey);
 
 	if (!user || Object.keys(user).length === 0) {
 		return { success: false, error: 'Benutzerdaten nicht gefunden' };
@@ -67,7 +68,7 @@ export async function login(email: string, password: string) {
 	const passwordMatch = await bcrypt.compare(password, user.password);
 
 	if (passwordMatch) {
-		await createSession(userId, user.type);
+		await createSession(userKey, user.type);
 
 		const cookieStore = cookies();
 		const redirectUrl = (await cookieStore).get('redirectUrl')?.value;
@@ -89,21 +90,26 @@ export async function logout() {
 }
 
 // Change Password
-export async function changePassword(userId: string, confirmation_password: string, new_password: string) {
-	const password = await redis.hGet(userId, 'password');
+export async function changePassword(userKey: string, confirmation_password: string, new_password: string) {
+	try {
+		const password = await redis.hGet(userKey, 'password');
 
-	if (!password) {
-		return { success: false, error: 'Nutzer Password nicht gefunden' };
+		if (!password) {
+			return { success: false, error: 'Nutzer Password nicht gefunden' };
+		}
+
+		const passwordMatch = await bcrypt.compare(confirmation_password, password);
+
+		if (passwordMatch) {
+			const hashedPassword = await bcrypt.hash(new_password, 10);
+			await redis.hSet(userKey, {
+				password: hashedPassword,
+			});
+			return { success: true };
+		}
+		return { success: false, error: 'Überprüfe dein altes Password' };
+	} catch (error) {
+		console.error('Fehler beim Ändern des Passworts:', error);
+		return { success: false, error: 'Änderung des Passworts fehlgeschlagen' };
 	}
-
-	const passwordMatch = await bcrypt.compare(confirmation_password, password);
-
-	if (passwordMatch) {
-		const hashedPassword = await bcrypt.hash(new_password, 10);
-		await redis.hSet(userId, {
-			password: hashedPassword,
-		});
-		return { success: true };
-	}
-	return { success: false, error: 'Überprüfe dein altes Password' };
 }

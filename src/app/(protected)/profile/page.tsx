@@ -6,16 +6,16 @@ import { useEffect, useState } from 'react';
 import { User } from '@/lib/definitions';
 
 export default function ProfilePage() {
-	const { userId } = useUser();
+	const { userKey } = useUser();
 	const [user, setUser] = useState<User | null>(null);
 
 	useEffect(() => {
 		async function getUserInfo() {
-			const user = await getUser(userId as string);
+			const user = await getUser(userKey as string);
 			setUser(user as User);
 		}
 		getUserInfo();
-	}, [userId]);
+	}, [userKey]);
 
 	if (user === null) {
 		return <div>Laden...</div>;

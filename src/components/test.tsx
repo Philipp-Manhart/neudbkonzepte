@@ -3,11 +3,11 @@
 import { useUser } from '@/lib/context';
 
 export default function ExampleClientComponent() {
-	const { userId, userType } = useUser();
+	const { userKey, userType } = useUser();
 
 	return (
 		<div>
-			<p>{userId ? `Logged in as: ${userId}` : 'Not logged in'}</p>
+			<p>{userKey ? `Logged in as: ${userKey}` : 'Not logged in'}</p>
 			<p>{` Usertype ${userType}`}</p>
 		</div>
 	);

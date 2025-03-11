@@ -4,13 +4,12 @@ import { nanoid } from 'nanoid';
 
 export async function createPoll(owner: string, name: string, description: string, defaultduration: string) {
 	const uniqueId = nanoid();
-
-	const pollId = `poll:${uniqueId}`;
+	const pollKey = `poll:${uniqueId}`;
 	const status = 'closed';
 
 	const multi = redis.multi();
 
-	multi.hSet(pollId, {
+	multi.hSet(pollKey, {
 		owner,
 		name,
 		description,
@@ -18,37 +17,54 @@ export async function createPoll(owner: string, name: string, description: strin
 		defaultduration,
 	});
 	const timestamp = Date.now();
-	multi.zAdd(`user:${owner}:polls`, { score: timestamp, value: pollId });
+	multi.zAdd(`user:${owner}:polls`, { score: timestamp, value: pollKey });
 
 	try {
 		await multi.exec();
-		const poll = await getPoll(pollId);
-		return { success: true, id: uniqueId, poll };
+		const poll = await getPoll(pollKey);
+		return { success: true, pollKey, poll };
 	} catch (error) {
 		console.error('Fehler beim Erstellen der Umfrage:', error);
 		return { success: false, error: 'Erstellung der Umfrage fehlgeschlagen' };
 	}
 }
 
-export async function updatePoll(pollId: string, name: string, description: string, defaultduration: string) {} //TODO
+export async function updatePoll(pollKey: string, name: string, description: string, defaultduration: string) {
+	try {
+		const poll = await redis.hGetAll(pollKey);
+		if (!Object.keys(poll).length) {
+			return { success: false, error: 'Abstimmung nicht vorhanden' };
+		}
 
-export async function deletePoll(pollId: string) {
-	const poll = await redis.hGetAll(pollId);
+		await redis.hSet(pollKey, {
+			name,
+			description,
+			defaultduration,
+		});
+
+		return { success: true, pollKey };
+	} catch (error) {
+		console.error('Fehler beim Aktualisieren der Umfrage:', error);
+		return { success: false, error: 'Aktualisierung der Umfrage fehlgeschlagen' };
+	}
+}
+
+export async function deletePoll(pollKey: string) {
+	const poll = await redis.hGetAll(pollKey);
 	if (!Object.keys(poll).length) {
 		return { success: false, error: 'Abstimmung nicht vorhanden' };
 	}
 
 	const multi = redis.multi();
 
-	const questionIds = await redis.zRange(`${pollId}:questions`, 0, -1);
-	for (const questionId of questionIds) {
-		const questionKey = `question:${questionId}`;
+	const questionKeys = await redis.zRange(`${pollKey}:questions`, 0, -1);
+	for (const questionKey of questionKeys) {
 		multi.del(questionKey);
 	}
 
-	multi.del(`${pollId}:questions`);
-	multi.del(pollId);
-	multi.zRem(`user:${poll.owner}:polls`, pollId);
+	multi.del(`${pollKey}:questions`);
+	multi.del(pollKey);
+	multi.zRem(`user:${poll.owner}:polls`, pollKey);
 
 	try {
 		await multi.exec();
@@ -59,37 +75,41 @@ export async function deletePoll(pollId: string) {
 	}
 }
 
-export async function getPoll(pollId: string) {
+export async function getPoll(pollKey: string) {
 	try {
-		const poll = await redis.hGetAll(pollId);
+		const poll = await redis.hGetAll(pollKey);
 		if (!poll || Object.keys(poll).length === 0) {
 			return { success: false, error: 'Abstimmung nicht vorhanden' };
 		}
-		return poll;
+
+		return {
+			...poll,
+			pollKey,
+		};
 	} catch (error) {
 		console.error('Fehler beim Abrufen der Umfrage:', error);
 		return { success: false, error: 'Abrufen der Umfrage fehlgeschlagen' };
 	}
 }
 
-export async function getPollsByOwner(userId: string) {
+export async function getPollsByOwner(userKey: string) {
 	try {
-		const pollIds = await redis.zRange(`user:${userId}:polls`, 0, -1, { REV: true });
-		if (!pollIds || pollIds.length === 0) {
+		const pollKeys = await redis.zRange(`${userKey}:polls`, 0, -1, { REV: true });
+		if (!pollKeys || pollKeys.length === 0) {
 			return { success: false, error: 'Keine Abstimmungen vorhanden' };
 		}
 
 		const multi = redis.multi();
 
-		for (const pollId of pollIds) {
-			multi.hGetAll(pollId);
+		for (const pollKey of pollKeys) {
+			multi.hGetAll(pollKey);
 		}
 
 		const pollsData = await multi.exec();
 		const polls = pollsData.map((result, index) => {
 			const pollData = result || {};
 			return {
-				id: pollIds[index].replace('poll:', ''),
+				pollKey: pollKeys[index],
 				...pollData,
 			};
 		});

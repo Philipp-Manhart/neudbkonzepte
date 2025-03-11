@@ -31,7 +31,7 @@ import { redirect } from 'next/navigation';
 // -answer
 
 export async function enterPollRun(pollId: string) {
-	const pollExists = await redis.exists(`poll:${pollId}`);
+	const pollExists = await redis.exists(`poll_run:${pollId}`);
 	if (!pollExists) {
 		return { success: false, error: 'Abstimmung nicht vorhanden' };
 	} else {
