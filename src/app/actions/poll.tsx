@@ -35,7 +35,7 @@ export async function createPoll(owner: string, name: string, description: strin
 		const poll = await getPoll(pollId);
 		return { success: true, id: uniqueId, poll };
 	} catch (error) {
-		return { success: false, error: 'Failed to create poll' };
+		return { success: false, error: 'Erstellung fehlgeschlagen' };
 	}
 }
 
