@@ -2,6 +2,8 @@
 import { redis } from '@/lib/redis';
 import { nanoid } from 'nanoid';
 
+
+// Delete and Updates should not really delete
 export async function createQuestion(pollKey: string, type: string, questionText: string, possibleAnswers?: string[]) {
 	const uniqueId = nanoid();
 	const questionKey = `question:${uniqueId}`;

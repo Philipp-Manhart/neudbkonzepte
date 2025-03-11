@@ -19,14 +19,14 @@ export default function EnterPollForm() {
 	const form = useForm<z.infer<typeof EnterPollFormSchema>>({
 		resolver: zodResolver(EnterPollFormSchema),
 		defaultValues: {
-			pollId: '',
+			enterCode: '',
 		},
 	});
 
 	async function onSubmit(values: z.infer<typeof EnterPollFormSchema>) {
 		setIsSubmitting(true);
 		setError(null);
-		const result = await enterPollRun(values.pollId);
+		const result = await enterPollRun(values.enterCode);
 		if (result && !result.success) {
 			setError(result.error);
 			toast.error('Abstimmung beitreten fehlgeschlagen');
@@ -46,7 +46,7 @@ export default function EnterPollForm() {
 
 				<FormField
 					control={form.control}
-					name="pollId"
+					name="enterCode"
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Abstimmung</FormLabel>
