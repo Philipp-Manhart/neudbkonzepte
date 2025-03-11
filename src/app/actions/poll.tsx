@@ -1,20 +1,12 @@
 'use server';
 // enter und create überarbeiten wegen poll_run
 import { redis } from '@/lib/redis';
-import { customAlphabet } from 'nanoid';
-import { redirect } from 'next/navigation';
-
-export async function enterPoll(pollId: string) {
-	const pollExists = await redis.exists(`poll:${pollId}`);
-	if (!pollExists) {
-		return { success: false, error: 'Abstimmung nicht vorhanden' };
-	} else {
-		redirect(`/poll/${pollId}`);
-	}
-}
+import { nanoid } from 'nanoid';
 
 export async function createPoll(owner: string, name: string, description: string, defaultduration: string) {
-	const uniqueId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6);
+	// const uniqueId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6);
+	const uniqueId = nanoid();
+
 	const pollId = `poll:${uniqueId}`;
 	const status = 'closed';
 
