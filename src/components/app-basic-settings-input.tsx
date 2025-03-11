@@ -13,7 +13,7 @@ interface PollNameInputProps {
 	descriptionError?: string;
 }
 
-export default function PollNameInput({
+export default function BasicSettingsInput({
 	defaultTime,
 	setDefaultTime,
 	description,
@@ -41,10 +41,10 @@ export default function PollNameInput({
 
 				<p className="py-3 pb-5">Zeit pro Frage:</p>
 				<div className="flex items-center justify-center py-5">
-					<Slider value={defaultTime} max={7} min={1} step={1} onValueChange={(val) => setDefaultTime(val)} />
+					<Slider value={defaultTime} max={300} min={10} step={5} onValueChange={(val) => setDefaultTime(val)} />
 				</div>
 				<div className="flex items-center justify-center">
-					<p>{defaultTime} Minuten pro Frage</p>
+					<p>{defaultTime} Sekunden pro Frage</p>
 				</div>
 				<div className="items-center justify-center">
 					<p className="py-3">Beschreibung der Umfrage:</p>

@@ -30,6 +30,7 @@ export async function createPoll(owner: string, name: string, description: strin
 	const timestamp = Date.now();
 	multi.zAdd(`user:${owner}:polls`, { score: timestamp, value: pollId });
 	await multi.exec();
+	//Hier bitte die PollID returnen
 }
 
 export async function getPoll(pollId: string) {

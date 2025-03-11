@@ -1,24 +1,27 @@
 'use client';
-import { useState } from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from './ui/button';
 import { MinusCircle, PlusCircle, X } from 'lucide-react';
 import { Alert, AlertDescription } from './ui/alert';
 
-type QuestionType = 'multiple-choice' | 'single-choice' | 'yes-no' | 'scale';
+export type QuestionType = 'multiple-choice' | 'single-choice' | 'yes-no' | 'scale';
 
 interface AddQuestionProps {
 	questionId: number;
 	onRemove: (id: number) => void;
 	canRemove: boolean;
+	questionType: QuestionType | null;
+	setQuestionType: (questionType: QuestionType) => void;
+	questionText: string;
+	setQuestionText: (questionText: string) => void;
+	optionTexts: string[];
+	setOptionTexts: (optionTexts: string[]) => void;
+	error: string | null;
 }
 
-export default function AddQuestion({ questionId, onRemove, canRemove }: AddQuestionProps) {
-	const [questionType, setQuestionType] = useState<QuestionType | null>(null);
-	const [questionText, setQuestionText] = useState('');
-	const [optionTexts, setOptionTexts] = useState<string[]>(Array(4).fill(''));
-	const [error, setError] = useState<string | null>(null);
+export default function AddQuestion({ questionId, onRemove, canRemove, questionType, setQuestionType, questionText, setQuestionText, optionTexts, setOptionTexts, error }: AddQuestionProps) {
 
 	const removeOption = (index: number) => {
 		const newOptions = optionTexts.filter((_, i) => i !== index);
@@ -33,25 +36,6 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 		const newOptionTexts = [...optionTexts];
 		newOptionTexts[index] = value;
 		setOptionTexts(newOptionTexts);
-	};
-
-	const validateForm = () => {
-		setError(null);
-
-		if (!questionText.trim()) {
-			setError('Bitte geben Sie eine Frage ein.');
-			return false;
-		}
-
-		if (questionType === 'multiple-choice' || questionType === 'single-choice') {
-			const emptyOptions = optionTexts.some((option) => !option.trim());
-			if (emptyOptions) {
-				setError('Bitte füllen Sie alle Auswahlmöglichkeiten aus.');
-				return false;
-			}
-		}
-
-		return true;
 	};
 
 	return (
@@ -84,16 +68,15 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 						</SelectContent>
 					</Select>
 				</div>
+				{error && (
+                <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
 
 				{questionType && (
-					<div className="space-y-4">
-						{error && (
-							<Alert variant="destructive">
-								<AlertDescription>{error}</AlertDescription>
-							</Alert>
-						)}
-
-						<div>
+					<>
+						<div className="space-y-4">
 							<label className="text-sm font-medium mb-2 block">Frage</label>
 							<textarea
 								className="w-full p-2 border rounded-md"
@@ -131,7 +114,7 @@ export default function AddQuestion({ questionId, onRemove, canRemove }: AddQues
 								</Button>
 							</div>
 						)}
-					</div>
+					</>
 				)}
 			</CardContent>
 		</Card>
