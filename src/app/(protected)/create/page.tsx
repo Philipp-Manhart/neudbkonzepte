@@ -111,11 +111,9 @@ export default function CreatePage() {
 
 			for (const question of questions) {
 				if (question.type) {
-					//Phillip fragen
-					//await createQuestion(newPoll.pollId, question.text, question.type, question.options);
+					await createQuestion(newPoll.id as string, question.text, question.type, question.options);
 				}
 			}
-
 			router.push('/dashboard');
 		}
 	}

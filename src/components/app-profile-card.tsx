@@ -3,13 +3,10 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { PencilIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
+import { User } from '@/lib/definitions';
 
 interface ProfileCardProps {
-	user: {
-		first_name: string;
-		last_name: string;
-		email: string;
-	};
+	user: User;
 }
 
 export function ProfileCard({ user }: ProfileCardProps) {
