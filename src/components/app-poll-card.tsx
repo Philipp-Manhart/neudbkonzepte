@@ -13,11 +13,7 @@ export function PollCard({ poll }: pollCardProps) {
 	return (
 		<Card className="w-full max-w-3xl mb-4">
 			<CardHeader>
-				<div className="flex justify-between items-start w-full">
-					<div>
-						<h2 className="text-2xl font-bold">{poll.name}</h2>
-					</div>
-				</div>
+				<h2 className="text-2xl font-bold">{poll.name}</h2>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="flex items-center gap-2">
@@ -37,15 +33,15 @@ export function PollCard({ poll }: pollCardProps) {
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">
-				<Button className="w-full flex-1 flex items-center justify-center gap-2">
+				<Button className="w-full flex-1 flex items-center gap-2">
 					<PlayIcon className="h-4 w-4" />
 					Durchführen
 				</Button>
-				<Button variant="outline" className="w-full flex-1 flex items-center justify-center gap-2">
+				<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
 					<EditIcon className="h-4 w-4" />
 					Bearbeiten
 				</Button>
-				<Button variant="outline" className="w-full flex-1 flex items-center justify-center gap-2">
+				<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
 					<View className="h-4 w-4" />
 					Ansehen
 				</Button>

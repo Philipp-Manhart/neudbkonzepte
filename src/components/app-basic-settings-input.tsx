@@ -1,7 +1,8 @@
-"use client";
-import { Card, CardContent, CardHeader } from './ui/card';
+'use client';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Slider } from './ui/slider';
+import { Label } from '@/components/ui/label';
 
 interface BasicSettingsInputProps {
 	defaultTime: number[];
@@ -27,29 +28,32 @@ export default function BasicSettingsInput({
 	return (
 		<Card className="w-full max-w-2xl relative">
 			<CardHeader>
-				<p className="text-2xl">Allgemeine Einstellungen:</p>
+				<CardTitle>Allgemeine Einstellungen</CardTitle>
 			</CardHeader>
-			<CardContent>
-				<p className="py-3">Umfragenname:</p>
-				<Input
-					type="text"
-					className={`w-full border rounded-md ${nameError ? 'border-red-500' : ''}`}
-					placeholder={'Beispielname'}
-					onChange={(e) => setPollName(e.target.value)}
-					value={pollName}
-				/>
-				{nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
-
-				<p className="py-3 pb-5">Zeit pro Frage:</p>
-				<div className="flex items-center justify-center py-5">
-					<Slider value={defaultTime} max={300} min={10} step={5} onValueChange={(val) => setDefaultTime(val)} />
+			<CardContent className="space-y-8">
+				<div>
+					<Label className="mb-2">Umfragenname:</Label>
+					<Input
+						type="text"
+						className={`w-full border rounded-md ${nameError ? 'border-red-500' : ''}`}
+						placeholder={'Beispielname'}
+						onChange={(e) => setPollName(e.target.value)}
+						value={pollName}
+					/>
+					{nameError && <p className="text-red-500 text-sm mt-1">{nameError}</p>}
 				</div>
-				<div className="flex items-center justify-center">
-					<p>{defaultTime} Sekunden pro Frage</p>
+				<div>
+					<Label className="mb-2">Zeit pro Frage:</Label>
+
+					<div className="flex items-center justify-center py-2">
+						<Slider value={defaultTime} max={300} min={10} step={5} onValueChange={(val) => setDefaultTime(val)} />
+					</div>
+					<div className="flex items-center justify-center">
+						<p>{defaultTime} Sekunden pro Frage</p>
+					</div>
 				</div>
 				<div className="items-center justify-center">
-					<p className="py-3">Beschreibung der Umfrage:</p>
-
+					<Label className="mb-2">Beschreibung der Umfrage:</Label>
 					<textarea
 						className={`w-full p-2 border rounded-md ${descriptionError ? 'border-red-500' : ''}`}
 						rows={3}

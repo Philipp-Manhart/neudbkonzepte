@@ -1,5 +1,4 @@
 'use client';
-import ExampleClientComponent from '@/components/test';
 import { PastCreatedPolls } from '@/components/app-past-surveys';
 import { getPollsByOwner } from '@/app/actions/poll';
 import { useUser } from '@/lib/context';
@@ -28,12 +27,7 @@ export default function Dashboard() {
 	if (!Array.isArray(polls) && polls.error) {
 		return (
 			<div className="flex flex-col items-center pt-[25vh]">
-				<h1 className="text-2xl font-bold">Dashboard</h1>
-				<p className="text-lg">Willkommen im Dashboard!</p>
-				<p className="text-lg">Hier können Sie Ihre Daten verwalten.</p>
-
-				<ExampleClientComponent />
-				<div>Du hast keine Abstimmungen</div>
+				<p className="text-xl font-semibold">Du hast keine Abstimmungen</p>
 			</div>
 		);
 	}
@@ -45,7 +39,7 @@ export default function Dashboard() {
 
 	return (
 		<div className="container mx-auto px-4">
-			<h1 className="text-3xl font-semibold text-center mb-6">Deine Abstimmungen:</h1>
+			<h1 className="text-3xl font-semibold text-center mb-6">Meine Abstimmungen:</h1>
 			<PastCreatedPolls polls={polls} />
 		</div>
 	);

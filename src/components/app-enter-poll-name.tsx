@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Slider } from './ui/slider';
 
@@ -26,7 +26,7 @@ export default function BasicSettingsInput({
 	return (
 		<Card className="w-full max-w-2xl relative">
 			<CardHeader>
-				<p className="text-2xl">Allgemeine Einstellungen:</p>
+				<CardTitle>Allgemeine Einstellungen</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<p className="py-3">Umfragenname:</p>

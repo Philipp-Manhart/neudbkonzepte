@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from './ui/button';
 import { MinusCircle, PlusCircle, X } from 'lucide-react';
 import { Alert, AlertDescription } from './ui/alert';
+import { Label } from '@/components/ui/label';
+
 
 export type QuestionType = 'multiple-choice' | 'single-choice' | 'yes-no' | 'scale';
 
@@ -21,8 +23,18 @@ interface AddQuestionProps {
 	error: string | null;
 }
 
-export default function AddQuestion({ questionId, onRemove, canRemove, questionType, setQuestionType, questionText, setQuestionText, optionTexts, setOptionTexts, error }: AddQuestionProps) {
-
+export default function AddQuestion({
+	questionId,
+	onRemove,
+	canRemove,
+	questionType,
+	setQuestionType,
+	questionText,
+	setQuestionText,
+	optionTexts,
+	setOptionTexts,
+	error,
+}: AddQuestionProps) {
 	const removeOption = (index: number) => {
 		const newOptions = optionTexts.filter((_, i) => i !== index);
 		setOptionTexts(newOptions);
@@ -55,7 +67,7 @@ export default function AddQuestion({ questionId, onRemove, canRemove, questionT
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div>
-					<label className="text-sm font-medium mb-2 block">Fragentyp</label>
+					<Label className="mb-2">Fragentyp</Label>
 					<Select onValueChange={(value: QuestionType) => setQuestionType(value)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="Fragetyp auswählen" />
@@ -69,15 +81,15 @@ export default function AddQuestion({ questionId, onRemove, canRemove, questionT
 					</Select>
 				</div>
 				{error && (
-                <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                </Alert>
-            )}
+					<Alert variant="destructive">
+						<AlertDescription>{error}</AlertDescription>
+					</Alert>
+				)}
 
 				{questionType && (
 					<>
 						<div className="space-y-4">
-							<label className="text-sm font-medium mb-2 block">Frage</label>
+							<Label className="mb-2">Frage</Label>
 							<textarea
 								className="w-full p-2 border rounded-md"
 								rows={3}
@@ -90,7 +102,7 @@ export default function AddQuestion({ questionId, onRemove, canRemove, questionT
 						{/* Different input options based on question type */}
 						{(questionType === 'multiple-choice' || questionType === 'single-choice') && (
 							<div className="space-y-2">
-								<p className="text-sm font-medium">Auswahlmöglichkeiten</p>
+								<Label className="mb-2">Auswahlmöglichkeiten</Label>
 								{optionTexts.map((optionText, index) => (
 									<div key={index} className="flex items-center gap-2 mb-2">
 										<input
