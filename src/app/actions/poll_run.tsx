@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 // Delete should not really delete
 
 export async function startPollRun(pollKey: string) {
+
 	const uniqueId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6)();
 	const pollRunKey = `poll_run:${uniqueId}`;
 

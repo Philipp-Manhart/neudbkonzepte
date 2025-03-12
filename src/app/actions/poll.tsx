@@ -18,7 +18,7 @@ export async function createPoll(owner: string, name: string, description: strin
 		defaultduration,
 	});
 	const timestamp = Date.now();
-	multi.zAdd(`user:${owner}:polls`, { score: timestamp, value: pollKey });
+	multi.zAdd(`${owner}:polls`, { score: timestamp, value: pollKey });
 
 	try {
 		await multi.exec();
