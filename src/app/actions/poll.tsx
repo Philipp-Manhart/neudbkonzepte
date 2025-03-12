@@ -1,11 +1,11 @@
 'use server';
 import { redis } from '@/lib/redis';
 import { nanoid } from 'nanoid';
+import { pollIdConverter, keyConverter } from '@/app/actions/converter';
 
-// Delete and Updates should not really delete
 export async function createPoll(owner: string, name: string, description: string, defaultduration: string) {
-	const uniqueId = nanoid();
-	const pollKey = `poll:${uniqueId}`;
+	const pollId = nanoid();
+	const pollKey = await pollIdConverter(pollId);
 	const status = 'closed';
 
 	const multi = redis.multi();
@@ -22,15 +22,16 @@ export async function createPoll(owner: string, name: string, description: strin
 
 	try {
 		await multi.exec();
-		return { success: true, pollKey };
+		return { success: true, pollId };
 	} catch (error) {
 		console.error('Fehler beim Erstellen der Umfrage:', error);
 		return { success: false, error: 'Erstellung der Umfrage fehlgeschlagen' };
 	}
 }
 
-export async function updatePoll(pollKey: string, name: string, description: string, defaultduration: string) {
+export async function updatePoll(pollId: string, name: string, description: string, defaultduration: string) {
 	try {
+		const pollKey = await pollIdConverter(pollId);
 		const poll = await redis.hGetAll(pollKey);
 		if (!Object.keys(poll).length) {
 			return { success: false, error: 'Abstimmung nicht vorhanden' };
@@ -42,14 +43,15 @@ export async function updatePoll(pollKey: string, name: string, description: str
 			defaultduration,
 		});
 
-		return { success: true, pollKey };
+		return { success: true, pollId };
 	} catch (error) {
 		console.error('Fehler beim Aktualisieren der Umfrage:', error);
 		return { success: false, error: 'Aktualisierung der Umfrage fehlgeschlagen' };
 	}
 }
 
-export async function deletePoll(pollKey: string) {
+export async function deletePoll(pollId: string) {
+	const pollKey = await pollIdConverter(pollId);
 	const poll = await redis.hGetAll(pollKey);
 	if (!Object.keys(poll).length) {
 		return { success: false, error: 'Abstimmung nicht vorhanden' };
@@ -64,7 +66,7 @@ export async function deletePoll(pollKey: string) {
 
 	multi.del(`${pollKey}:questions`);
 	multi.del(pollKey);
-	multi.zRem(`user:${poll.owner}:polls`, pollKey);
+	multi.zRem(`${poll.owner}:polls`, pollKey);
 
 	try {
 		await multi.exec();
@@ -75,8 +77,9 @@ export async function deletePoll(pollKey: string) {
 	}
 }
 
-export async function getPoll(pollKey: string) {
+export async function getPoll(pollId: string) {
 	try {
+		const pollKey = await pollIdConverter(pollId);
 		const poll = await redis.hGetAll(pollKey);
 		if (!poll || Object.keys(poll).length === 0) {
 			return { success: false, error: 'Abstimmung nicht vorhanden' };
@@ -85,7 +88,7 @@ export async function getPoll(pollKey: string) {
 
 		return {
 			...poll,
-			pollKey,
+			pollId,
 			questionCount,
 		};
 	} catch (error) {
@@ -108,20 +111,22 @@ export async function getPollsByOwner(userKey: string) {
 		}
 
 		const pollsData = await multi.exec();
-		
-		const questionCountsPromises = pollKeys.map(pollKey => 
-			redis.zCard(`${pollKey}:questions`)
-		);
+
+		const questionCountsPromises = pollKeys.map((pollKey) => redis.zCard(`${pollKey}:questions`));
 		const questionCounts = await Promise.all(questionCountsPromises);
-		
-		const polls = pollsData.map((result, index) => {
+
+		const pollsPromises = pollsData.map(async (result, index) => {
 			const pollData = result || {};
+			const pollKey = pollKeys[index];
+			const pollId = await keyConverter(pollKey);
 			return {
-				pollKey: pollKeys[index],
+				pollId,
 				questionCount: questionCounts[index] || 0,
 				...pollData,
 			};
 		});
+
+		const polls = await Promise.all(pollsPromises);
 
 		return polls;
 	} catch (error) {

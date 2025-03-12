@@ -1,12 +1,13 @@
 'use server';
 import { redis } from '@/lib/redis';
 import { nanoid } from 'nanoid';
-
+import { pollIdConverter, keyConverter, questionIdConverter } from '@/app/actions/converter';
 
 // Delete and Updates should not really delete
-export async function createQuestion(pollKey: string, type: string, questionText: string, possibleAnswers?: string[]) {
-	const uniqueId = nanoid();
-	const questionKey = `question:${uniqueId}`;
+export async function createQuestion(pollId: string, type: string, questionText: string, possibleAnswers?: string[]) {
+	const pollKey = await pollIdConverter(pollId);
+	const questionId = nanoid();
+	const questionKey = await questionIdConverter(questionId);
 
 	const multi = redis.multi();
 
@@ -22,15 +23,16 @@ export async function createQuestion(pollKey: string, type: string, questionText
 
 	try {
 		await multi.exec();
-		return { success: true, questionKey };
+		return { success: true, questionId };
 	} catch (error) {
 		console.error('Fehler beim Erstellen der Frage:', error);
 		return { success: false, error: 'Erstellung der Frage fehlgeschlagen' };
 	}
 }
 
-export async function getQuestion(questionKey: string) {
+export async function getQuestion(questionId: string) {
 	try {
+		const questionKey = await questionIdConverter(questionId);
 		const question = await redis.hGetAll(questionKey);
 		if (!question || Object.keys(question).length === 0) {
 			return { success: false, error: 'Frage nicht vorhanden' };
@@ -41,7 +43,7 @@ export async function getQuestion(questionKey: string) {
 			success: true,
 			question: {
 				...question,
-				questionKey,
+				questionId,
 			},
 		};
 	} catch (error) {
@@ -50,8 +52,9 @@ export async function getQuestion(questionKey: string) {
 	}
 }
 
-export async function getQuestionsByPollId(pollKey: string) {
+export async function getQuestionsByPollId(pollId: string) {
 	try {
+		const pollKey = await pollIdConverter(pollId);
 		const questionKeys = await redis.zRange(`${pollKey}:questions`, 0, -1);
 		if (!questionKeys || questionKeys.length === 0) {
 			return { success: false, error: 'Keine Fragen vorhanden' };
@@ -64,14 +67,18 @@ export async function getQuestionsByPollId(pollKey: string) {
 		}
 
 		const questionsData = await multi.exec();
-		const questions = questionsData.map((result, index) => {
-			const questionData = result || {};
-			questionData.possibleAnswers = JSON.parse(questionData.possibleAnswers || '[]');
-			return {
-				questionKey: questionKeys[index],
-				...questionData,
-			};
-		});
+		const questions = await Promise.all(
+			questionsData.map(async (result, index) => {
+				const questionData = result || {};
+				questionData.possibleAnswers = JSON.parse(questionData.possibleAnswers || '[]');
+				const questionKey = questionKeys[index];
+				const questionId = await keyConverter(questionKey);
+				return {
+					questionId,
+					...questionData,
+				};
+			})
+		);
 
 		return { success: true, questions };
 	} catch (error) {
@@ -81,12 +88,13 @@ export async function getQuestionsByPollId(pollKey: string) {
 }
 
 export async function updateQuestion(
-	questionKey: string,
+	questionId: string,
 	type: string,
 	questionText: string,
 	possibleAnswers: string[]
 ) {
 	try {
+		const questionKey = await questionIdConverter(questionId);
 		const question = await redis.hGetAll(questionKey);
 		if (!question || Object.keys(question).length === 0) {
 			return { success: false, error: 'Frage nicht vorhanden' };
@@ -98,15 +106,16 @@ export async function updateQuestion(
 			possibleAnswers: JSON.stringify(possibleAnswers),
 		});
 
-		return { success: true, questionKey };
+		return { success: true, questionId };
 	} catch (error) {
 		console.error('Fehler beim Aktualisieren der Frage:', error);
 		return { success: false, error: 'Aktualisierung der Frage fehlgeschlagen' };
 	}
 }
 
-export async function deleteQuestion(questionKey: string) {
+export async function deleteQuestion(questionId: string) {
 	try {
+		const questionKey = await questionIdConverter(questionId);
 		const question = await redis.hGetAll(questionKey);
 		if (!question || Object.keys(question).length === 0) {
 			return { success: false, error: 'Frage nicht vorhanden' };

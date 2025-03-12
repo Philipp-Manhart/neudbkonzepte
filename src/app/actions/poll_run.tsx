@@ -2,13 +2,14 @@
 import { redis } from '@/lib/redis';
 import { customAlphabet } from 'nanoid';
 import { redirect } from 'next/navigation';
+import { pollIdConverter, keyConverter, questionIdConverter, pollRunIdConverter } from '@/app/actions/converter';
 
 // Delete should not really delete
 
-export async function startPollRun(pollKey: string) {
-
-	const uniqueId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6)();
-	const pollRunKey = `poll_run:${uniqueId}`;
+export async function startPollRun(pollId: string) {
+	const pollKey = await await pollIdConverter(pollId);
+	const pollRunId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6)();
+	const pollRunKey = await pollRunIdConverter(pollRunId);
 
 	try {
 		const multi = redis.multi();
@@ -29,14 +30,15 @@ export async function startPollRun(pollKey: string) {
 		const pollRun = await redis.hGetAll(pollRunKey);
 
 		await multi.exec();
-		return { success: true, pollRunKey, pollRun };
+		return { success: true, pollRunId, pollRun };
 	} catch (error) {
 		console.error('Fehler beim Erstellen des Abstimmungslaufs:', error);
 		return { success: false, error: 'Erstellung des Abstimmungslaufs fehlgeschlagen' };
 	}
 }
 
-export async function addTimeToPollRun(pollRunKey: string, addedTime: number) {
+export async function addTimeToPollRun(pollRunId: string, addedTime: number) {
+	const pollRunKey = await pollRunIdConverter(pollRunId);
 	const pollRun = await redis.hGetAll(pollRunKey);
 	if (!Object.keys(pollRun).length) {
 		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
@@ -55,7 +57,8 @@ export async function addTimeToPollRun(pollRunKey: string, addedTime: number) {
 	}
 }
 
-export async function endPollRun(pollRunKey: string) {
+export async function endPollRun(pollRunId: string) {
+	const pollRunKey = await pollRunIdConverter(pollRunId);
 	const pollRun = await redis.hGetAll(pollRunKey);
 	if (!Object.keys(pollRun).length) {
 		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
@@ -75,7 +78,8 @@ export async function endPollRun(pollRunKey: string) {
 	}
 }
 
-export async function getPollRun(pollRunKey: string) {
+export async function getPollRun(pollRunId: string) {
+	const pollRunKey = await pollRunIdConverter(pollRunId);
 	const pollRun = await redis.hGetAll(pollRunKey);
 	if (!Object.keys(pollRun).length) {
 		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
@@ -85,8 +89,9 @@ export async function getPollRun(pollRunKey: string) {
 	}
 }
 
-export async function getPollRunsByPollId(pollKey: string) {
+export async function getPollRunsByPollId(pollId: string) {
 	try {
+		const pollKey = await pollIdConverter(pollId);
 		const pollRunKeys = await redis.zRange(`${pollKey}:poll_runs`, 0, -1);
 		if (!pollRunKeys || pollRunKeys.length === 0) {
 			return { success: false, error: 'Keine Abstimmungsläufe vorhanden' };
@@ -114,7 +119,12 @@ export async function getPollRunsByPollId(pollKey: string) {
 	}
 }
 
-export async function deletePollRun(pollRunKey: string) {
+export async function getPollRunsByOwner(userKey: string) {}
+
+export async function getPollRunsByParticipant(userKey: string) {}
+
+export async function deletePollRun(pollRunId: string) {
+	const pollRunKey = await pollRunIdConverter(pollRunId);
 	const pollRun = await redis.hGetAll(pollRunKey);
 	if (!Object.keys(pollRun).length) {
 		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
@@ -135,20 +145,22 @@ export async function deletePollRun(pollRunKey: string) {
 }
 
 export async function enterPollRun(enterCode: string) {
-	const pollExists = await redis.exists(`poll_run${enterCode}`);
-	if (!pollExists) {
-		return { success: false, error: 'Abstimmung nicht vorhanden' };
-	} else {
+	try {
+		const pollRunKey = await pollRunIdConverter(enterCode);
+		const pollExists = await redis.exists(pollRunKey);
+		if (!pollExists) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+		const status = await redis.hGet(pollRunKey, 'status');
+		if (status !== 'open') {
+			return { success: false, error: 'Abstimmungslauf ist nicht geöffnet' };
+		}
 		redirect(`/poll/${enterCode}`);
+	} catch (error) {
+		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);
+		return { success: false, error: 'Fehler beim Betreten des Abstimmungslaufs' };
 	}
 }
-// poll:(id):poll_runs
-// -ids
-
-// poll_runs(id)
-// -status
-// -start
-// -end
 
 //poll_run:(id):questions
 // -ids
@@ -166,5 +178,3 @@ export async function enterPollRun(enterCode: string) {
 
 // user:(id):poll_run:(id):question:(id):answer
 // -answer
-
-// const uniqueId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6);
