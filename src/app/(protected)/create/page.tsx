@@ -113,7 +113,7 @@ export default function CreatePage() {
 					await createQuestion(newPoll.pollKey as string, question.text, question.type, question.options);
 				}
 			}
-			router.push('/dashboard');
+			router.push('/');
 		}
 	}
 

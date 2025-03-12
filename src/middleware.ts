@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { refreshSession, getSession } from './lib/session';
 
-const protectedRoutes = ['/profile', '/dashboard', '/poll', '/profile/edit', '/create', '/my-polls' , '/my-participations', '/polls/[id]'];
+const protectedRoutes = [
+	'/profile',
+	'/poll',
+	'/profile/edit',
+	'/create',
+	'/my-polls',
+	'/my-participations',
+	'/polls/[id]',
+];
 const publicRoutes = ['/login'];
 
 export default async function middleware(req: NextRequest) {
@@ -25,7 +33,7 @@ export default async function middleware(req: NextRequest) {
 
 		// Regular authenticated redirect from public routes (like login)
 		if (isPublicRoute) {
-			return NextResponse.redirect(new URL('/dashboard', req.url));
+			return NextResponse.redirect(new URL('/', req.url));
 		}
 	} else if (isProtectedRoute) {
 		// Save the current URL before redirecting to login

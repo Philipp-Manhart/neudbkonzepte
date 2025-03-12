@@ -34,7 +34,7 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 		await multi.exec();
 
 		await createSession(userKey, type);
-		redirect('/dashboard');
+		redirect('');
 	}
 }
 
@@ -48,7 +48,7 @@ export async function signupAnonymous() {
 	});
 
 	await createSession(userKey, type);
-	redirect('/dashboard');
+	redirect('/');
 }
 
 // Login / Logout
@@ -77,7 +77,7 @@ export async function login(email: string, password: string) {
 			(await cookieStore).delete('redirectUrl');
 			redirect(redirectUrl);
 		} else {
-			redirect('/dashboard');
+			redirect('/');
 		}
 	} else {
 		return { success: false, error: 'Ungültige E-Mail oder Passwort' };
