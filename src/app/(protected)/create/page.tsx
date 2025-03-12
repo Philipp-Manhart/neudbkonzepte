@@ -110,7 +110,7 @@ export default function CreatePage() {
 
 			for (const question of questions) {
 				if (question.type) {
-					await createQuestion(newPoll.id as string, question.text, question.type, question.options);
+					await createQuestion(newPoll.pollKey as string, question.text, question.type, question.options);
 				}
 			}
 			router.push('/dashboard');

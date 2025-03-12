@@ -22,8 +22,7 @@ export async function createPoll(owner: string, name: string, description: strin
 
 	try {
 		await multi.exec();
-		const poll = await getPoll(pollKey);
-		return { success: true, pollKey, poll };
+		return { success: true, pollKey };
 	} catch (error) {
 		console.error('Fehler beim Erstellen der Umfrage:', error);
 		return { success: false, error: 'Erstellung der Umfrage fehlgeschlagen' };

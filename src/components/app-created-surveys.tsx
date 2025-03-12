@@ -1,5 +1,5 @@
 //Hier die ganzen Survey Cards mappen
-import { SurveyCard } from './app-survey-profile-card';
+import { SurveyCard } from './app-poll-dashboard-card';
 
 interface PastSurveysProps {
 	surveys: {

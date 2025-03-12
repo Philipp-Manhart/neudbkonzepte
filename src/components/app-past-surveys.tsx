@@ -1,21 +1,16 @@
-//Hier die ganzen Survey Cards mappen
-import { SurveyCard } from "./app-survey-profile-card";
+//Hier die ganzen poll Cards mappen
+import { PollCardDashboard } from './app-poll-dashboard-card';
+import { Poll } from '@/lib/definitions';
 
-interface PastSurveysProps {
-	surveys: {
-		title: string;
-		date: string;
-		participantCount: number;
-		questionCount: number;
-	}[];
-	onCreatedPage: boolean;
+interface PastPollsProps {
+	polls: Poll[];
 }
 
-export function PastSurveys({ surveys, onCreatedPage }: PastSurveysProps) {
+export function PastCreatedPolls({ polls }: PastPollsProps) {
 	return (
 		<>
-			{surveys.map((survey, index) => (
-				<SurveyCard onCreatedPage={onCreatedPage} key={index} survey={survey} />
+			{polls.map((poll, index) => (
+				<PollCardDashboard key={index} poll={poll} />
 			))}
 		</>
 	);

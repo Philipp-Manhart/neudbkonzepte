@@ -25,3 +25,10 @@ export interface Session {
 	expiresAt: Date;
 	userType: string;
 }
+
+export interface Poll{
+	owner: string;
+	title: string;
+	description: string;
+	questionCount: number;
+}

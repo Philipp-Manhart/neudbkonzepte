@@ -1,8 +1,9 @@
+"use client";
 import { Card, CardContent, CardHeader } from './ui/card';
 import { Input } from './ui/input';
 import { Slider } from './ui/slider';
 
-interface PollNameInputProps {
+interface BasicSettingsInputProps {
 	defaultTime: number[];
 	setDefaultTime: (value: number[]) => void;
 	description: string;
@@ -22,7 +23,7 @@ export default function BasicSettingsInput({
 	setPollName,
 	nameError,
 	descriptionError,
-}: PollNameInputProps) {
+}: BasicSettingsInputProps) {
 	return (
 		<Card className="w-full max-w-2xl relative">
 			<CardHeader>
