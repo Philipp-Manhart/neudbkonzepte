@@ -119,7 +119,7 @@ export default function CreatePage() {
 
 	return (
 		<div className="flex flex-col items-center gap-6">
-			<h1 className="text-3xl  font-semibold">Erstelle eine neue Umfrage:</h1>
+			<h1 className="text-3xl font-semibold">Erstelle eine neue Umfrage:</h1>
 			<BasicSettingsInput
 				defaultTime={defaultTime}
 				setDefaultTime={setDefaultTime}

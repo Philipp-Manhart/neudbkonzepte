@@ -1,5 +1,5 @@
 //Hier die ganzen poll Cards mappen
-import { PollCardDashboard } from './app-poll-dashboard-card';
+import { PollCard } from './app-poll-card';
 import { Poll } from '@/lib/definitions';
 
 interface PastPollsProps {
@@ -8,10 +8,10 @@ interface PastPollsProps {
 
 export function PastCreatedPolls({ polls }: PastPollsProps) {
 	return (
-		<>
+		<div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-center">
 			{polls.map((poll, index) => (
-				<PollCardDashboard key={index} poll={poll} />
+				<PollCard key={index} poll={poll} />
 			))}
-		</>
+		</div>
 	);
 }

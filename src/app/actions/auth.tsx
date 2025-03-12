@@ -29,12 +29,11 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 			email,
 			password: hashedPassword,
 		});
-		// Store the complete userKey in the email index
 		multi.set(emailKey, userKey);
 		await multi.exec();
 
 		await createSession(userKey, type);
-		redirect('');
+		redirect('/');
 	}
 }
 

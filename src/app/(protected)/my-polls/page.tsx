@@ -44,18 +44,9 @@ export default function Dashboard() {
 	}
 
 	return (
-		<div className="flex flex-col items-center pt-[25vh]">
-			<h1 className="text-2xl font-bold">Dashboard</h1>
-			<p className="text-lg">Willkommen im Dashboard!</p>
-			<p className="text-lg">Hier können Sie Ihre Daten verwalten.</p>
-
-			<ExampleClientComponent />
-			<div className="container mx-auto flex flex-col items-center py-10">
-				<h3 className="text-bold text-4xl pb-6 text-center">Umfragen, die du durchgeführt hast</h3>
-				<div className="w-full max-w-4xl">
-					<PastCreatedPolls polls={polls} />
-				</div> 
-			</div>
+		<div className="container mx-auto px-4">
+			<h1 className="text-3xl font-semibold text-center mb-6">Deine Abstimmungen:</h1>
+			<PastCreatedPolls polls={polls} />
 		</div>
 	);
 }

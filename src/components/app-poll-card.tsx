@@ -9,7 +9,7 @@ interface pollCardProps {
 	poll: Poll;
 }
 
-export function PollCardDashboard({ poll }: pollCardProps) {
+export function PollCard({ poll }: pollCardProps) {
 	return (
 		<Card className="w-full max-w-3xl mb-4">
 			<CardHeader>
@@ -36,18 +36,18 @@ export function PollCardDashboard({ poll }: pollCardProps) {
 					<p className="text-lg">{poll.questionCount}</p>
 				</div>
 			</CardContent>
-			<CardFooter className="flex justify-end pt-2 gap-2">
-				<Button className="flex items-center gap-2">
+			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">
+				<Button className="w-full flex-1 flex items-center justify-center gap-2">
 					<PlayIcon className="h-4 w-4" />
-					Umfrage Durchführen
+					Durchführen
 				</Button>
-				<Button variant="outline" className="flex items-center gap-2">
+				<Button variant="outline" className="w-full flex-1 flex items-center justify-center gap-2">
 					<EditIcon className="h-4 w-4" />
-					Umfrage bearbeiten
+					Bearbeiten
 				</Button>
-				<Button variant="outline" className="flex items-center gap-2">
+				<Button variant="outline" className="w-full flex-1 flex items-center justify-center gap-2">
 					<View className="h-4 w-4" />
-					Umfrage ansehen
+					Ansehen
 				</Button>
 			</CardFooter>
 		</Card>
