@@ -46,7 +46,7 @@ export default async function middleware(req: NextRequest) {
 			value: req.nextUrl.pathname + req.nextUrl.search,
 			path: '/',
 			httpOnly: true,
-			maxAge: 60 * 10, // 10 minutes
+			maxAge: 60 * 30, // 30 minutes
 			sameSite: 'lax',
 		});
 

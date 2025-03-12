@@ -81,10 +81,12 @@ export async function getPoll(pollKey: string) {
 		if (!poll || Object.keys(poll).length === 0) {
 			return { success: false, error: 'Abstimmung nicht vorhanden' };
 		}
+		const questionCount = await redis.zCard(`${pollKey}:questions`);
 
 		return {
 			...poll,
 			pollKey,
+			questionCount,
 		};
 	} catch (error) {
 		console.error('Fehler beim Abrufen der Umfrage:', error);

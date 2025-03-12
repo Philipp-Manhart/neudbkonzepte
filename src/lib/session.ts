@@ -6,7 +6,7 @@ import { Session } from './definitions';
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
-const SESSION_DURATION_MS = 10 * 60 * 1000; // 10 minutes
+const SESSION_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 
 export async function createSession(userKey: string, userType: string) {
 	const expiresAt = new Date(Date.now() + SESSION_DURATION_MS);
@@ -48,7 +48,7 @@ export async function decrypt(session: string | undefined = ''): Promise<Session
 			algorithms: ['HS256'],
 		});
 		return payload as unknown as Session;
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	} catch (error) {
 		return undefined;
 	}
