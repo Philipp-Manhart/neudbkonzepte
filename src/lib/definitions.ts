@@ -28,7 +28,7 @@ export interface Session {
 
 export interface Poll{
 	owner: string;
-	title: string;
+	name: string;
 	description: string;
 	questionCount: number;
 }

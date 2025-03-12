@@ -6,40 +6,6 @@ import { useUser } from '@/lib/context';
 import { useState, useEffect } from 'react';
 import { Poll } from '@/lib/definitions';
 
-// Mock data for testing
-const mockPolls: Poll[] = [
-	{
-		owner: 'user123',
-		title: 'Kursumfrage Webentwicklung',
-		description: 'Feedback zum React Workshop',
-		questionCount: 5,
-	},
-	{
-		owner: 'user123',
-		title: 'Team-Mittagessen Präferenzen',
-		description: 'Wahl des Restaurants für das Team-Mittagessen nächste Woche',
-		questionCount: 3,
-	},
-	{
-		owner: 'user123',
-		title: 'Technische Kompetenzanalyse',
-		description: 'Selbsteinschätzung der Programmierkenntnisse',
-		questionCount: 10,
-	},
-	{
-		owner: 'user123',
-		title: 'Abstimmung Konferenzthemen',
-		description: 'Welche Themen sollen auf der nächsten Tech-Konferenz präsentiert werden?',
-		questionCount: 8,
-	},
-	{
-		owner: 'user123',
-		title: 'Homeoffice Zufriedenheit',
-		description: 'Feedback zur Arbeit im Homeoffice',
-		questionCount: 7,
-	},
-];
-
 export default function Dashboard() {
 	const { userKey } = useUser();
 	const [polls, setPolls] = useState<Poll[] | null>(null);
@@ -48,8 +14,8 @@ export default function Dashboard() {
 		async function getPolls() {
 			const pollData = await getPollsByOwner(userKey as string);
 			console.log(pollData);
-			//setPolls(pollData as Poll[]);
-			setPolls(mockPolls);
+			setPolls(pollData as Poll[]);
+			//setPolls(mockPolls);
 		}
 		getPolls();
 	}, [userKey]);
@@ -88,7 +54,7 @@ export default function Dashboard() {
 				<h3 className="text-bold text-4xl pb-6 text-center">Umfragen, die du durchgeführt hast</h3>
 				<div className="w-full max-w-4xl">
 					<PastCreatedPolls polls={polls} />
-				</div>
+				</div> 
 			</div>
 		</div>
 	);

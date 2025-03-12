@@ -15,7 +15,7 @@ export function PollCardDashboard({ poll }: pollCardProps) {
 			<CardHeader>
 				<div className="flex justify-between items-start w-full">
 					<div>
-						<h2 className="text-2xl font-bold">{poll.title}</h2>
+						<h2 className="text-2xl font-bold">{poll.name}</h2>
 					</div>
 				</div>
 			</CardHeader>
@@ -32,7 +32,7 @@ export function PollCardDashboard({ poll }: pollCardProps) {
 				</div>
 				<div className="flex items-center gap-2">
 					<UsersIcon className="h-4 w-4 text-muted-foreground" />
-					<label className="text-base font-medium text-muted-foreground">Anzahl Fragen:</label>
+					<label className="text-base font-medium text-muted-foreground">Anzahl Durchführungen:</label>
 					<p className="text-lg">{poll.questionCount}</p>
 				</div>
 			</CardContent>
