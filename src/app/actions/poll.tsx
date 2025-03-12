@@ -108,10 +108,17 @@ export async function getPollsByOwner(userKey: string) {
 		}
 
 		const pollsData = await multi.exec();
+		
+		const questionCountsPromises = pollKeys.map(pollKey => 
+			redis.zCard(`${pollKey}:questions`)
+		);
+		const questionCounts = await Promise.all(questionCountsPromises);
+		
 		const polls = pollsData.map((result, index) => {
 			const pollData = result || {};
 			return {
 				pollKey: pollKeys[index],
+				questionCount: questionCounts[index] || 0,
 				...pollData,
 			};
 		});
