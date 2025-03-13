@@ -10,13 +10,20 @@ export async function createQuestion(pollId: string, type: string, questionText:
 	const questionKey = await questionIdConverter(questionId);
 
 	const multi = redis.multi();
-
-	multi.hSet(questionKey, {
+	
+	// Create basic question data
+	const questionData: Record<string, string> = {
 		type, // 'single' | 'multiple' | 'yes/no' | 'scale'
 		pollKey,
 		questionText,
-		possibleAnswers: JSON.stringify(possibleAnswers), // only for 'single' and 'multiple'
-	});
+	};
+	
+	// Only add possibleAnswers if provided
+	if (possibleAnswers) {
+		questionData.possibleAnswers = JSON.stringify(possibleAnswers);
+	}
+	
+	multi.hSet(questionKey, questionData);
 
 	const timestamp = Date.now();
 	multi.zAdd(`${pollKey}:questions`, { score: timestamp, value: questionKey });

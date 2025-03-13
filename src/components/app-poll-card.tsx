@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { CalendarIcon, UsersIcon, PlayIcon, EditIcon, View } from 'lucide-react';
+import { CalendarIcon, UsersIcon, PlayIcon, EditIcon, View, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Poll } from '@/lib/definitions';
 import Link from 'next/link';
@@ -11,11 +11,14 @@ interface pollCardProps {
 }
 
 export function PollCard({ poll }: pollCardProps) {
-	const redirectLink = `/my-polls/${poll.pollId}`
+	const redirectLink = `/my-polls/${poll.pollId}`;
 	return (
 		<Card className="w-full max-w-3xl mb-4">
-			<CardHeader>
+			<CardHeader className="flex flex-row items-center justify-between">
 				<h2 className="text-2xl font-bold">{poll.name}</h2>
+				<Button variant={'destructive'}>
+					<Trash2 className="h-4 w-4" />
+				</Button>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="flex items-center gap-2">
