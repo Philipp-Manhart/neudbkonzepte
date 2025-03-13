@@ -11,14 +11,12 @@ export async function createQuestion(pollId: string, type: string, questionText:
 
 	const multi = redis.multi();
 	
-	// Create basic question data
 	const questionData: Record<string, string> = {
 		type, // 'single' | 'multiple' | 'yes/no' | 'scale'
 		pollKey,
 		questionText,
 	};
 	
-	// Only add possibleAnswers if provided
 	if (possibleAnswers) {
 		questionData.possibleAnswers = JSON.stringify(possibleAnswers);
 	}

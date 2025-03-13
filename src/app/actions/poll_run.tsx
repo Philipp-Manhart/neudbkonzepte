@@ -4,10 +4,10 @@ import { customAlphabet } from 'nanoid';
 import { redirect } from 'next/navigation';
 import { pollIdConverter, keyConverter, questionIdConverter, pollRunIdConverter } from '@/lib/converter';
 
-// Delete should not really delete
+// ids as return converter etc.
 
 export async function startPollRun(pollId: string) {
-	const pollKey = await await pollIdConverter(pollId);
+	const pollKey = await pollIdConverter(pollId);
 	const pollRunId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6)();
 	const pollRunKey = await pollRunIdConverter(pollRunId);
 
@@ -27,10 +27,8 @@ export async function startPollRun(pollId: string) {
 
 		multi.zAdd(`${pollKey}:poll_runs`, { score: Date.now(), value: pollRunKey });
 
-		const pollRun = await redis.hGetAll(pollRunKey);
-
 		await multi.exec();
-		return { success: true, pollRunId, pollRun };
+		return { success: true, pollRunId };
 	} catch (error) {
 		console.error('Fehler beim Erstellen des Abstimmungslaufs:', error);
 		return { success: false, error: 'Erstellung des Abstimmungslaufs fehlgeschlagen' };
@@ -38,40 +36,51 @@ export async function startPollRun(pollId: string) {
 }
 
 export async function addTimeToPollRun(pollRunId: string, addedTime: number) {
-	const pollRunKey = await pollRunIdConverter(pollRunId);
-	const pollRun = await redis.hGetAll(pollRunKey);
-	if (!Object.keys(pollRun).length) {
-		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
-	}
-
-	const multi = redis.multi();
-
-	multi.hIncrBy(pollRunKey, 'runDuration', addedTime);
-
 	try {
-		await multi.exec();
-		return { success: true };
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRun = await redis.hGetAll(pollRunKey);
+		if (!Object.keys(pollRun).length) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		await redis.hIncrBy(pollRunKey, 'runDuration', addedTime);
+		return { success: true, pollRunId };
 	} catch (error) {
 		console.error('Fehler beim Hinzufügen von Zeit zum Abstimmungslauf:', error);
 		return { success: false, error: 'Hinzufügen von Zeit fehlgeschlagen' };
 	}
 }
 
-export async function endPollRun(pollRunId: string) {
-	const pollRunKey = await pollRunIdConverter(pollRunId);
-	const pollRun = await redis.hGetAll(pollRunKey);
-	if (!Object.keys(pollRun).length) {
-		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
-	}
-	const multi = redis.multi();
-	multi.hSet(pollRunKey, {
-		status: 'closed',
-		end: Date.now(),
-	});
-
+export async function subtractTimeFromPollRun(pollRunId: string, subtractedTime: number) {
 	try {
-		await multi.exec();
-		return { success: true };
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRun = await redis.hGetAll(pollRunKey);
+		if (!Object.keys(pollRun).length) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		await redis.hIncrBy(pollRunKey, 'runDuration', -subtractedTime);
+		return { success: true, pollRunId };
+	} catch (error) {
+		console.error('Fehler beim Abziehen von Zeit vom Abstimmungslauf:', error);
+		return { success: false, error: 'Abziehen von Zeit fehlgeschlagen' };
+	}
+}
+
+export async function endPollRun(pollRunId: string) {
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRun = await redis.hGetAll(pollRunKey);
+		if (!Object.keys(pollRun).length) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		await redis.hSet(pollRunKey, {
+			status: 'closed',
+			end: Date.now(),
+		});
+
+		return { success: true, pollRunId };
 	} catch (error) {
 		console.error('Fehler beim Beenden des Abstimmungslaufs:', error);
 		return { success: false, error: 'Beenden des Abstimmungslaufs fehlgeschlagen' };
@@ -79,13 +88,26 @@ export async function endPollRun(pollRunId: string) {
 }
 
 export async function getPollRun(pollRunId: string) {
-	const pollRunKey = await pollRunIdConverter(pollRunId);
-	const pollRun = await redis.hGetAll(pollRunKey);
-	if (!Object.keys(pollRun).length) {
-		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
-	} else {
-		pollRun.pollKey = pollRunKey;
-		return { success: true, pollRun };
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRun = await redis.hGetAll(pollRunKey);
+		if (!Object.keys(pollRun).length) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		const pollId = pollRun.pollKey ? await keyConverter(pollRun.pollKey) : '';
+
+		return {
+			success: true,
+			pollRun: {
+				...pollRun,
+				pollId,
+				pollRunId,
+			},
+		};
+	} catch (error) {
+		console.error('Fehler beim Abrufen des Abstimmungslaufs:', error);
+		return { success: false, error: 'Abrufen des Abstimmungslaufs fehlgeschlagen' };
 	}
 }
 
@@ -104,14 +126,18 @@ export async function getPollRunsByPollId(pollId: string) {
 		}
 
 		const pollRunsData = await multi.exec();
-		const pollRuns = pollRunsData.map((result, index) => {
+		const pollRunsPromises = pollRunsData.map(async (result, index) => {
 			const pollRunData = result || {};
+			const pollRunKey = pollRunKeys[index];
+			const pollRunId = await keyConverter(pollRunKey);
 			return {
-				pollRunKey: pollRunKeys[index],
 				...pollRunData,
+				pollRunId,
+				pollId,
 			};
 		});
 
+		const pollRuns = await Promise.all(pollRunsPromises);
 		return { success: true, pollRuns };
 	} catch (error) {
 		console.error('Fehler beim Abrufen der Abstimmungsläufe:', error);
@@ -119,23 +145,52 @@ export async function getPollRunsByPollId(pollId: string) {
 	}
 }
 
-export async function getPollRunsByOwner(userKey: string) {}
+export async function getPollRunsByOwner(userKey: string) {
+	try {
+		const pollKeys = await redis.zRange(`${userKey}:polls`, 0, -1);
+		if (!pollKeys || pollKeys.length === 0) {
+			return { success: false, error: 'Keine Abstimmungen vorhanden' };
+		}
 
-export async function getPollRunsByParticipant(userKey: string) {}
+		const allPollRuns = [];
+
+		for (const pollKey of pollKeys) {
+			const pollId = await keyConverter(pollKey);
+			const result = await getPollRunsByPollId(pollId);
+			if (result.success && result.pollRuns) {
+				allPollRuns.push(...result.pollRuns);
+			}
+		}
+
+		if (allPollRuns.length === 0) {
+			return { success: false, error: 'Keine Abstimmungsläufe vorhanden' };
+		}
+
+		return { success: true, pollRuns: allPollRuns };
+	} catch (error) {
+		console.error('Fehler beim Abrufen der Abstimmungsläufe:', error);
+		return { success: false, error: 'Abrufen der Abstimmungsläufe fehlgeschlagen' };
+	}
+}
+
+export async function getPollRunsByParticipant(userKey: string) {
+	// Implementation to be added
+	return { success: false, error: 'Funktion noch nicht implementiert' };
+}
 
 export async function deletePollRun(pollRunId: string) {
-	const pollRunKey = await pollRunIdConverter(pollRunId);
-	const pollRun = await redis.hGetAll(pollRunKey);
-	if (!Object.keys(pollRun).length) {
-		return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
-	}
-
-	const multi = redis.multi();
-
-	multi.del(pollRunKey);
-	multi.zRem(`${pollRun.pollKey}:poll_runs`, pollRunKey);
-
 	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRun = await redis.hGetAll(pollRunKey);
+		if (!Object.keys(pollRun).length) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		const multi = redis.multi();
+
+		multi.del(pollRunKey);
+		multi.zRem(`${pollRun.pollKey}:poll_runs`, pollRunKey);
+
 		await multi.exec();
 		return { success: true };
 	} catch (error) {

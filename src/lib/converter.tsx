@@ -1,4 +1,7 @@
-export async function keyConverter(key: string) {
+export async function keyConverter(key: string | string[]): Promise<string | string[]> {
+  if (Array.isArray(key)) {
+    return key.map(k => k.split(':')[1]);
+  }
   return key.split(':')[1];
 }
 
