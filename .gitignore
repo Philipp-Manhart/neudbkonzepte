@@ -42,3 +42,8 @@ next-env.d.ts
 
 # dump file redis
 *.rdb
+
+# nextjs-server-action-tester
+/public/server-actions.json
+/src/app/api/list-actions
+/src/app/list-actions

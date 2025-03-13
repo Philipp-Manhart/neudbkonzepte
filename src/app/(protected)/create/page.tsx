@@ -110,7 +110,7 @@ export default function CreatePage() {
 
 			for (const question of questions) {
 				if (question.type) {
-					await createQuestion(newPoll.pollId as string, question.text, question.type, question.options);
+					await createQuestion(newPoll.pollId as string, question.type, question.text, question.options);
 				}
 			}
 			router.push('/');
