@@ -8,7 +8,7 @@ import { PlusCircle, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BasicSettingsInput from '@/components/app-basic-settings-input';
 import { updatePoll } from '@/app/actions/poll';
-import { updateQuestion, createQuestion } from '@/app/actions/question';
+import { updateQuestion, createQuestion, deleteQuestion } from '@/app/actions/question';
 import { QuestionData } from '@/lib/definitions';
 
 
@@ -116,6 +116,13 @@ export default function PollDetailsContent({ pollId, initialPollData, initialQue
 			await updatePoll(pollId, pollName, description, defaultTime[0].toString());
 
 			const existingQuestionIds = initialQuestionData.map((q) => q.questionId);
+			const currentQuestionIds = questions.map((q) => q.questionId);
+
+			for (const existingId of existingQuestionIds) {
+				if (!currentQuestionIds.includes(existingId)) {
+					await deleteQuestion(existingId);
+				}
+			}
 
 			for (const question of questions) {
 				if (question.type) {
@@ -129,6 +136,7 @@ export default function PollDetailsContent({ pollId, initialPollData, initialQue
 					} else {
 						await createQuestion(pollId, question.type, question.questionText, question.options as string[]);
 					}
+					
 				}
 			}
 
