@@ -1,7 +1,7 @@
 'use server';
 import { redis } from '@/lib/redis';
 import { nanoid } from 'nanoid';
-import { pollIdConverter, keyConverter, questionIdConverter } from '@/app/actions/converter';
+import { pollIdConverter, keyConverter, questionIdConverter } from '@/lib/converter';
 
 // Delete and Updates should not really delete
 export async function createQuestion(pollId: string, type: string, questionText: string, possibleAnswers?: string[]) {

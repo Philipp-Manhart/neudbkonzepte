@@ -2,7 +2,7 @@
 import { redis } from '@/lib/redis';
 import { customAlphabet } from 'nanoid';
 import { redirect } from 'next/navigation';
-import { pollIdConverter, keyConverter, questionIdConverter, pollRunIdConverter } from '@/app/actions/converter';
+import { pollIdConverter, keyConverter, questionIdConverter, pollRunIdConverter } from '@/lib/converter';
 
 // Delete should not really delete
 

@@ -1,7 +1,7 @@
 'use server';
 import { redis } from '@/lib/redis';
 import { nanoid } from 'nanoid';
-import { pollIdConverter, keyConverter } from '@/app/actions/converter';
+import { pollIdConverter, keyConverter } from '@/lib/converter';
 
 export async function createPoll(owner: string, name: string, description: string, defaultduration: string) {
 	const pollId = nanoid();
