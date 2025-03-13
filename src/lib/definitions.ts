@@ -27,8 +27,21 @@ export interface Session {
 }
 
 export interface Poll{
+	pollId: string;
 	owner: string;
 	name: string;
 	description: string;
 	questionCount: number;
+	defaultduration: string;
 }
+
+export interface QuestionData {
+	questionId: string;
+	type: QuestionType | null;
+	questionText: string;
+	options: string[] | null;
+	error: string | null;
+}
+
+export type QuestionType = 'multiple-choice' | 'single-choice' | 'yes-no' | 'scale';
+

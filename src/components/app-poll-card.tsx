@@ -4,12 +4,14 @@ import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card'
 import { CalendarIcon, UsersIcon, PlayIcon, EditIcon, View } from 'lucide-react';
 import { Button } from './ui/button';
 import { Poll } from '@/lib/definitions';
+import Link from 'next/link';
 
 interface pollCardProps {
 	poll: Poll;
 }
 
 export function PollCard({ poll }: pollCardProps) {
+	const redirectLink = `/my-polls/${poll.pollId}`
 	return (
 		<Card className="w-full max-w-3xl mb-4">
 			<CardHeader>
@@ -37,10 +39,12 @@ export function PollCard({ poll }: pollCardProps) {
 					<PlayIcon className="h-4 w-4" />
 					Durchführen
 				</Button>
-				<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
-					<EditIcon className="h-4 w-4" />
-					Bearbeiten
-				</Button>
+				<Link href={redirectLink}>
+					<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
+						<EditIcon className="h-4 w-4" />
+						Bearbeiten
+					</Button>
+				</Link>
 				<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
 					<View className="h-4 w-4" />
 					Ansehen

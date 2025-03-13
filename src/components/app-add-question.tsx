@@ -6,13 +6,12 @@ import { Button } from './ui/button';
 import { MinusCircle, PlusCircle, X } from 'lucide-react';
 import { Alert, AlertDescription } from './ui/alert';
 import { Label } from '@/components/ui/label';
+import { QuestionType } from '@/lib/definitions';
 
-
-export type QuestionType = 'multiple-choice' | 'single-choice' | 'yes-no' | 'scale';
 
 interface AddQuestionProps {
-	questionId: number;
-	onRemove: (id: number) => void;
+	questionId: string; 
+	onRemove: (id: string) => void; 
 	canRemove: boolean;
 	questionType: QuestionType | null;
 	setQuestionType: (questionType: QuestionType) => void;
@@ -35,17 +34,19 @@ export default function AddQuestion({
 	setOptionTexts,
 	error,
 }: AddQuestionProps) {
+	const options = optionTexts || [];
+
 	const removeOption = (index: number) => {
-		const newOptions = optionTexts.filter((_, i) => i !== index);
+		const newOptions = options.filter((_, i) => i !== index);
 		setOptionTexts(newOptions);
 	};
 
 	const addOption = () => {
-		setOptionTexts([...optionTexts, '']);
+		setOptionTexts([...options, '']);
 	};
 
 	const handleOptionChange = (index: number, value: string) => {
-		const newOptionTexts = [...optionTexts];
+		const newOptionTexts = [...options];
 		newOptionTexts[index] = value;
 		setOptionTexts(newOptionTexts);
 	};
@@ -68,7 +69,7 @@ export default function AddQuestion({
 			<CardContent className="space-y-4">
 				<div>
 					<Label className="mb-2">Fragentyp</Label>
-					<Select onValueChange={(value: QuestionType) => setQuestionType(value)}>
+					<Select value={questionType || undefined} onValueChange={(value: QuestionType) => setQuestionType(value)}>
 						<SelectTrigger className="w-full">
 							<SelectValue placeholder="Fragetyp auswählen" />
 						</SelectTrigger>
@@ -103,8 +104,8 @@ export default function AddQuestion({
 						{(questionType === 'multiple-choice' || questionType === 'single-choice') && (
 							<div className="space-y-2">
 								<Label className="mb-2">Auswahlmöglichkeiten</Label>
-								{optionTexts.map((optionText, index) => (
-									<div key={index} className="flex items-center gap-2 mb-2">
+								{options.map((optionText, index) => (
+									<div key={`option-${questionId}-${index}`} className="flex items-center gap-2 mb-2">
 										<input
 											type="text"
 											className="w-full p-2 border rounded-md"
@@ -116,7 +117,7 @@ export default function AddQuestion({
 											size="icon"
 											type="button"
 											onClick={() => removeOption(index)}
-											disabled={optionTexts.length <= 2}>
+											disabled={options.length <= 2}>
 											<MinusCircle />
 										</Button>
 									</div>
