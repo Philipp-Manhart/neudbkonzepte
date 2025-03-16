@@ -13,6 +13,7 @@ interface pollCardProps {
 export function PollCard({ poll }: pollCardProps) {
 	const redirectEditLink = `/my-polls/${poll.pollId}/edit`;
 	const redirectViewLink = `/my-polls/${poll.pollId}`;
+	const redirectStartLink = `/poll-run/${poll.pollId}`;
 
 	return (
 		<Card className="w-full max-w-3xl mb-4">
@@ -40,10 +41,12 @@ export function PollCard({ poll }: pollCardProps) {
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">
-				<Button className="w-full flex-1 flex items-center gap-2">
-					<PlayIcon className="h-4 w-4" />
-					Durchführen
-				</Button>
+				<Link className="w-full flex-1 flex items-center gap-2" href={redirectStartLink}>
+					<Button className="w-full flex-1 flex items-center gap-2">
+						<PlayIcon className="h-4 w-4" />
+						Durchführen
+					</Button>
+				</Link>
 				<Link className="w-full flex-1 flex items-center gap-2" href={redirectEditLink}>
 					<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
 						<EditIcon className="h-4 w-4" />

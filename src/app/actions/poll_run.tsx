@@ -155,7 +155,7 @@ export async function enterPollRun(enterCode: string) {
 		if (status !== 'open') {
 			return { success: false, error: 'Abstimmungslauf ist nicht geöffnet' };
 		}
-		redirect(`/poll/${enterCode}`);
+		redirect(`/participate/${enterCode}`);
 	} catch (error) {
 		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);
 		return { success: false, error: 'Fehler beim Betreten des Abstimmungslaufs' };
