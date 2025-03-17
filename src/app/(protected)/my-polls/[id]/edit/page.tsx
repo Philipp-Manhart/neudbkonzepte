@@ -1,8 +1,8 @@
+import PollDetailsContent from '../../../../../components/app-poll-details-content';
 import { getQuestionsByPollId } from '@/app/actions/question';
 import { getPoll } from '@/app/actions/poll';
 import { Poll } from '@/lib/definitions';
 import { QuestionData } from '@/lib/definitions';
-import PollViewContent from '@/components/app-view-poll-content';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
@@ -19,9 +19,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 		error: null,
 	}));
 
-	
-
 	return (
-		<PollViewContent pollData={pollData as Poll} questionData={formattedQuestionData as QuestionData[]}/>
+		<PollDetailsContent
+			pollId={id}
+			initialPollData={pollData as Poll}
+			initialQuestionData={formattedQuestionData as QuestionData[]}
+		/>
 	);
 }
