@@ -6,7 +6,7 @@ import { pollIdConverter, keyConverter, questionIdConverter, pollRunIdConverter 
 
 // ids as return converter etc.
 
-export async function startPollRun(pollId: string) {
+export async function createPollRun(pollId: string) {
 	const pollKey = await pollIdConverter(pollId);
 	const pollRunId = customAlphabet('abcdefghkmnpqrstuvwxyzADEFGHJKLMNPQRTUVWXY234679', 6)();
 	const pollRunKey = await pollRunIdConverter(pollRunId);
@@ -21,7 +21,7 @@ export async function startPollRun(pollId: string) {
 		multi.hSet(pollRunKey, {
 			pollKey,
 			status: 'open',
-			start: Date.now(),
+			created: Date.now(),
 			runDuration,
 		});
 
@@ -32,6 +32,20 @@ export async function startPollRun(pollId: string) {
 	} catch (error) {
 		console.error('Fehler beim Erstellen des Abstimmungslaufs:', error);
 		return { success: false, error: 'Erstellung des Abstimmungslaufs fehlgeschlagen' };
+	}
+}
+
+export async function startPollRun(pollRunId: string) {
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		await redis.hSet(pollRunKey, {
+			status: 'running',
+			started: Date.now(),
+		});
+		return { success: true };
+	} catch (error) {
+		console.error('Fehler beim Starten des Abstimmungslaufs:', error);
+		return { success: false, error: 'Starten des Abstimmungslaufs fehlgeschlagen' };
 	}
 }
 
