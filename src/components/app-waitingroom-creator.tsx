@@ -1,49 +1,51 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Play } from 'lucide-react';
-
-// Mock data for participants
-const mockParticipants = [
-	{ id: 1, name: 'Max Mustermann' },
-	{ id: 2, name: 'Anna Schmidt' },
-	{ id: 3, name: 'Erika Müller' },
-	{ id: 4, name: null }, // Anonymous participant
-	{ id: 5, name: 'Thomas Weber' },
-	{ id: 6, name: null }, // Anonymous participant
-];
-
-// Mock number of questions
-const mockQuestionCount = 12;
+import { startPollRun } from '@/app/actions/poll_run';
 
 interface WaitingRoomOwnerProps {
-	// Props can be added here if needed later
+	pollRunId: string;
+	questionsCount: number;
+	participants: {
+		id: number;
+		name: string | null;
+	}[];
 }
 
-export default function OwnerWaitingRoom() {
+export default function OwnerWaitingRoom({ questionsCount, participants, pollRunId }: WaitingRoomOwnerProps) {
+	const [isStarting, setIsStarting] = useState<boolean>(false);
+	async function handleStartPoll() {
+		setIsStarting(true);
+		await startPollRun(pollRunId);
+		setIsStarting(false);
+	}
+
 	return (
 		<div className="flex flex-col items-center p-6 max-w-3xl mx-auto">
 			<h1 className="text-2xl font-bold mb-6">Beginne die Umfrage sobald du willst.</h1>
 
 			<div className="w-full p-4 rounded-lg mb-6">
-				<p className="text-lg mb-2">Anzahl Fragen: {mockQuestionCount}</p>
-				<p className="text-lg">Teilnehmer bisher: {mockParticipants.length}</p>
+				<p className="text-lg mb-2">Anzahl Fragen: {questionsCount}</p>
+				<p className="text-lg">Teilnehmer bisher: {participants.length}</p>
 			</div>
 
 			<div className="w-full">
 				<h2 className="text-xl font-semibold mb-3">Teilnehmer:</h2>
 				<ul className="border rounded-lg divide-y ">
-					{mockParticipants.map((participant) => (
+					{participants.map((participant) => (
 						<li key={participant.id} className="px-4 py-3">
 							{participant.name || 'Anonym'}
 						</li>
 					))}
 				</ul>
 			</div>
-
-			<Button className="mt-6">
-				<Play />
-				Umfrage starten
-			</Button>
+			<div className="pt-5">
+				<Button onClick={handleStartPoll} disabled={isStarting}>
+					<Play />
+					Umfrage starten
+				</Button>
+			</div>
 		</div>
 	);
 }

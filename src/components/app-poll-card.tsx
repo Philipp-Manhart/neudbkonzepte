@@ -5,15 +5,34 @@ import { CalendarIcon, UsersIcon, PlayIcon, EditIcon, View, Trash2 } from 'lucid
 import { Button } from './ui/button';
 import { Poll } from '@/lib/definitions';
 import Link from 'next/link';
+import { createPollRun } from '@/app/actions/poll_run';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 interface pollCardProps {
 	poll: Poll;
 }
 
 export function PollCard({ poll }: pollCardProps) {
+	const router = useRouter();
+	const [isStarting, setIsStarting] = useState(false);
 	const redirectEditLink = `/my-polls/${poll.pollId}/edit`;
 	const redirectViewLink = `/my-polls/${poll.pollId}`;
-	const redirectStartLink = `/poll-run/${poll.pollId}`;
+
+	async function handleStartPoll() {
+		setIsStarting(true);
+		const newPollRun = await createPollRun(poll.pollId);
+
+		//const result = await startPollRun(newPollRun.pollRunId as string)
+		
+		setIsStarting(false);
+
+		if (newPollRun.success && newPollRun.pollRunId) {
+			router.push(`/poll-run/${newPollRun.pollRunId}`);
+		} else {
+			console.error('Failed to start poll:', newPollRun.error);
+		}
+	}
 
 	return (
 		<Card className="w-full max-w-3xl mb-4">
@@ -41,12 +60,10 @@ export function PollCard({ poll }: pollCardProps) {
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">
-				<Link className="w-full flex-1 flex items-center gap-2" href={redirectStartLink}>
-					<Button className="w-full flex-1 flex items-center gap-2">
-						<PlayIcon className="h-4 w-4" />
-						Durchführen
-					</Button>
-				</Link>
+				<Button className="w-full flex-1 flex items-center gap-2" onClick={handleStartPoll} disabled={isStarting}>
+					<PlayIcon className="h-4 w-4" />
+					{isStarting ? 'Wird gestartet...' : 'Durchführen'}
+				</Button>
 				<Link className="w-full flex-1 flex items-center gap-2" href={redirectEditLink}>
 					<Button variant="outline" className="w-full flex-1 flex items-center gap-2">
 						<EditIcon className="h-4 w-4" />
