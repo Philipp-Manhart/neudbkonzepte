@@ -16,16 +16,42 @@ export async function createPollRun(pollId: string) {
 
 		const duration = await redis.hGet(pollKey, 'defaultduration');
 		const questionCount = await redis.zCard(`${pollKey}:questions`);
-		const runDuration = Date.now() + parseInt(duration || '0') * questionCount; // duration in seconds, question count in seconds
+		const runDuration = Date.now() + parseInt(duration || '0') * questionCount;
 
 		multi.hSet(pollRunKey, {
 			pollKey,
 			status: 'open',
 			created: Date.now(),
 			runDuration,
+			participantsCount: 0,
 		});
 
 		multi.zAdd(`${pollKey}:poll_runs`, { score: Date.now(), value: pollRunKey });
+
+		const questionKeys = await redis.zRange(`${pollKey}:questions`, 0, -1);
+
+		for (const questionKey of questionKeys) {
+			const questionData = await redis.hGetAll(questionKey);
+			if (Object.keys(questionData).length) {
+				const questionId = await keyConverter(questionKey);
+
+				multi.hSet(`${pollRunKey}:question:${questionId}`, {
+					type: questionData.type,
+					questionText: questionData.text,
+					possibleAnswers: questionData.options,
+				});
+
+				multi.hSet(`${pollRunKey}:question:${questionId}:results`, {
+					initialized: Date.now(),
+				});
+
+				// Add to the poll run's questions sorted set
+				multi.zAdd(`${pollRunKey}:questions`, {
+					score: questionData.position || 0,
+					value: questionId,
+				});
+			}
+		}
 
 		await multi.exec();
 		return { success: true, pollRunId };
@@ -57,6 +83,10 @@ export async function addTimeToPollRun(pollRunId: string, addedTime: number) {
 			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
 		}
 
+		if (pollRun.status !== 'running') {
+			return { success: false, error: 'Zeit kann nur zu laufenden Abstimmungen hinzugefügt werden' };
+		}
+
 		await redis.hIncrBy(pollRunKey, 'runDuration', addedTime);
 		return { success: true, pollRunId };
 	} catch (error) {
@@ -73,6 +103,10 @@ export async function subtractTimeFromPollRun(pollRunId: string, subtractedTime:
 			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
 		}
 
+		if (pollRun.status !== 'running') {
+			return { success: false, error: 'Zeit kann nur von laufenden Abstimmungen abgezogen werden' };
+		}
+
 		await redis.hIncrBy(pollRunKey, 'runDuration', -subtractedTime);
 		return { success: true, pollRunId };
 	} catch (error) {
@@ -87,6 +121,10 @@ export async function endPollRun(pollRunId: string) {
 		const pollRun = await redis.hGetAll(pollRunKey);
 		if (!Object.keys(pollRun).length) {
 			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		if (pollRun.status !== 'running') {
+			return { success: false, error: 'Nur laufende Abstimmungen können beendet werden' };
 		}
 
 		await redis.hSet(pollRunKey, {
@@ -213,7 +251,7 @@ export async function deletePollRun(pollRunId: string) {
 	}
 }
 
-export async function enterPollRun(enterCode: string) {
+export async function enterPollRun(enterCode: string, userId?: string) {
 	try {
 		const pollRunKey = await pollRunIdConverter(enterCode);
 		const pollExists = await redis.exists(pollRunKey);
@@ -224,6 +262,15 @@ export async function enterPollRun(enterCode: string) {
 		if (status !== 'open') {
 			return { success: false, error: 'Abstimmungslauf ist nicht geöffnet' };
 		}
+
+		// Increment the participants count
+		await redis.hIncrBy(pollRunKey, 'participantsCount', 1);
+
+		// If we have a userId, add it to the participants set
+		if (userId) {
+			await redis.sAdd(`${pollRunKey}:participants`, userId);
+		}
+
 		redirect(`/poll/${enterCode}`);
 	} catch (error) {
 		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);
@@ -231,19 +278,18 @@ export async function enterPollRun(enterCode: string) {
 	}
 }
 
-//poll_run:(id):questions
-// -ids
+// poll_run{id}:question:{id}:results
+//answer 1 --> count
+//answer 2 --> count
+//...
 
-//poll_run:(id):question:(id):result
-// -answers + count
-// -status
+//user:{id}:poll_run:{id}:question:{id} -> STRING or HASH
+//value: selected answer(s)
 
-// for auth users
-// user:(id):poll_runs
-// -ids
+//poll_run:{id}:participants -> SET
+//members: user IDs of participants
 
-// user:(id):poll_run:(id):questions
-// -ids
-
-// user:(id):poll_run:(id):question:(id):answer
-// -answer
+//poll_run:{id}:question:{q_id} -> HASH
+//type: "single"
+//questionText: "What is..."
+//possibleAnswers: JSON array of options

@@ -38,7 +38,7 @@ export function PollCard({ poll }: pollCardProps) {
 		<Card className="w-full max-w-3xl mb-4">
 			<CardHeader className="flex flex-row items-center justify-between">
 				<h2 className="text-2xl font-bold">{poll.name}</h2>
-				<Button variant={'destructive'}>
+				<Button variant="outline">
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</CardHeader>
