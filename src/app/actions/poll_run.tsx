@@ -2,7 +2,7 @@
 import { redis } from '@/lib/redis';
 import { customAlphabet } from 'nanoid';
 import { redirect } from 'next/navigation';
-import { pollIdConverter, keyConverter, questionIdConverter, pollRunIdConverter } from '@/lib/converter';
+import { pollIdConverter, keyConverter, pollRunIdConverter } from '@/lib/converter';
 
 // ids as return converter etc.
 
@@ -45,9 +45,8 @@ export async function createPollRun(pollId: string) {
 					initialized: Date.now(),
 				});
 
-				// Add to the poll run's questions sorted set
 				multi.zAdd(`${pollRunKey}:questions`, {
-					score: questionData.position || 0,
+					score: parseInt(questionData.position as string) || 0,
 					value: questionId,
 				});
 			}
@@ -207,7 +206,8 @@ export async function getPollRunsByOwner(userKey: string) {
 		const allPollRuns = [];
 
 		for (const pollKey of pollKeys) {
-			const pollId = await keyConverter(pollKey);
+			const pollIdResult = await keyConverter(pollKey);
+			const pollId = Array.isArray(pollIdResult) ? pollIdResult[0] : pollIdResult;
 			const result = await getPollRunsByPollId(pollId);
 			if (result.success && result.pollRuns) {
 				allPollRuns.push(...result.pollRuns);
@@ -224,10 +224,40 @@ export async function getPollRunsByOwner(userKey: string) {
 		return { success: false, error: 'Abrufen der Abstimmungsläufe fehlgeschlagen' };
 	}
 }
-
 export async function getPollRunsByParticipant(userKey: string) {
-	// Implementation to be added
-	return { success: false, error: 'Funktion noch nicht implementiert' };
+	try {
+		const pollRunKeys = await redis.zRange(`${userKey}:participations`, 0, -1);
+
+		if (!pollRunKeys || pollRunKeys.length === 0) {
+			return { success: false, error: 'Keine Teilnahmen vorhanden' };
+		}
+
+		const multi = redis.multi();
+		for (const pollRunKey of pollRunKeys) {
+			multi.hGetAll(pollRunKey);
+		}
+
+		const pollRunsData = await multi.exec();
+		const pollRunsPromises = pollRunsData.map(async (result, index) => {
+			const pollRunData = result || {};
+			const pollRunKey = pollRunKeys[index];
+			const pollRunId = await keyConverter(pollRunKey);
+
+			const pollId = pollRunData.pollKey ? await keyConverter(pollRunData.pollKey) : '';
+
+			return {
+				...pollRunData,
+				pollRunId,
+				pollId,
+			};
+		});
+
+		const pollRuns = await Promise.all(pollRunsPromises);
+		return { success: true, pollRuns };
+	} catch (error) {
+		console.error('Fehler beim Abrufen der Teilnahmen:', error);
+		return { success: false, error: 'Abrufen der Teilnahmen fehlgeschlagen' };
+	}
 }
 
 export async function deletePollRun(pollRunId: string) {
@@ -251,7 +281,7 @@ export async function deletePollRun(pollRunId: string) {
 	}
 }
 
-export async function enterPollRun(enterCode: string, userId?: string) {
+export async function enterPollRun(enterCode: string, userKey?: string) {
 	try {
 		const pollRunKey = await pollRunIdConverter(enterCode);
 		const pollExists = await redis.exists(pollRunKey);
@@ -263,18 +293,186 @@ export async function enterPollRun(enterCode: string, userId?: string) {
 			return { success: false, error: 'Abstimmungslauf ist nicht geöffnet' };
 		}
 
-		// Increment the participants count
 		await redis.hIncrBy(pollRunKey, 'participantsCount', 1);
 
-		// If we have a userId, add it to the participants set
-		if (userId) {
-			await redis.sAdd(`${pollRunKey}:participants`, userId);
+		if (userKey) {
+			const multi = redis.multi();
+			multi.sAdd(`${pollRunKey}:participants`, userKey);
+			multi.zAdd(`${userKey}:participations`, {
+				score: Date.now(),
+				value: pollRunKey,
+			});
+			await multi.exec();
 		}
 
 		redirect(`/poll/${enterCode}`);
 	} catch (error) {
 		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);
 		return { success: false, error: 'Fehler beim Betreten des Abstimmungslaufs' };
+	}
+}
+
+export async function saveUserAnswer(
+	pollRunId: string,
+	questionId: string,
+	answers: string | string[],
+	userId?: string
+) {
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRunExists = await redis.exists(pollRunKey);
+		if (!pollRunExists) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		// Check if the poll is still running or open
+		const status = await redis.hGet(pollRunKey, 'status');
+		if (status !== 'running' && status !== 'open') {
+			return { success: false, error: 'Abstimmungslauf ist nicht aktiv' };
+		}
+
+		// Get question data to check type
+		const questionKey = `${pollRunKey}:question:${questionId}`;
+		const questionData = await redis.hGetAll(questionKey);
+
+		if (!Object.keys(questionData).length) {
+			return { success: false, error: 'Frage nicht vorhanden' };
+		}
+
+		const isMultipleChoice = questionData.type === 'multiple';
+		const answersArray = Array.isArray(answers) ? answers : [answers];
+
+		// Validate that we're receiving the correct answer format for the question type
+		if (!isMultipleChoice && Array.isArray(answers) && answers.length > 1) {
+			return { success: false, error: 'Mehrfachauswahl ist für diese Frage nicht erlaubt' };
+		}
+
+		const multi = redis.multi();
+		const resultsKey = `${pollRunKey}:question:${questionId}:results`;
+
+		// If user already answered this question, get previous answers to decrement them
+		if (userId) {
+			const userAnswerKey = `user:${userId}:poll_run:${pollRunId}:question:${questionId}`;
+			const previousAnswersData = await redis.get(userAnswerKey);
+
+			if (previousAnswersData) {
+				let previousAnswers: string[];
+				try {
+					previousAnswers = JSON.parse(previousAnswersData);
+					if (!Array.isArray(previousAnswers)) {
+						previousAnswers = [previousAnswersData];
+					}
+
+					// Decrement previous answers
+					for (const prevAnswer of previousAnswers) {
+						multi.hIncrBy(resultsKey, prevAnswer, -1);
+					}
+				} catch (e) {
+					// If parsing fails, assume it was a single string answer
+					multi.hIncrBy(resultsKey, previousAnswersData, -1);
+				}
+			}
+
+			// Save the new user answers
+			multi.set(userAnswerKey, JSON.stringify(answersArray));
+		}
+
+		// Increment the count for each selected answer
+		for (const answer of answersArray) {
+			multi.hIncrBy(resultsKey, answer, 1);
+		}
+
+		await multi.exec();
+		return { success: true, questionId, answers };
+	} catch (error) {
+		console.error('Fehler beim Speichern der Antwort:', error);
+		return { success: false, error: 'Speichern der Antwort fehlgeschlagen' };
+	}
+}
+
+export async function getQuestionResults(pollRunId: string, userKey?: string) {
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const pollRunExists = await redis.exists(pollRunKey);
+
+		if (!pollRunExists) {
+			return { success: false, error: 'Abstimmungslauf nicht vorhanden' };
+		}
+
+		// Get all questions for this poll run
+		const questionIds = await redis.zRange(`${pollRunKey}:questions`, 0, -1);
+
+		if (!questionIds.length) {
+			return { success: false, error: 'Keine Fragen gefunden' };
+		}
+
+		const questions = [];
+
+		for (const questionId of questionIds) {
+			const questionKey = `${pollRunKey}:question:${questionId}`;
+			const resultsKey = `${pollRunKey}:question:${questionId}:results`;
+
+			// Prepare and execute all promises concurrently
+			const promises = [redis.hGetAll(questionKey), redis.hGetAll(resultsKey)];
+
+			// Only add user answer query if userKey is provided
+			if (userKey) {
+				promises.push(redis.get(`${userKey}:poll_run:${pollRunId}:question:${questionId}`));
+			}
+
+			const results = await Promise.all(promises);
+			const questionData = results[0];
+			const resultsData = results[1];
+			const userAnswerData = userKey ? results[2] : null;
+
+			// Parse possible answers with error handling
+			let possibleAnswers = [];
+			if (questionData.possibleAnswers) {
+				try {
+					possibleAnswers = JSON.parse(questionData.possibleAnswers);
+				} catch {
+					console.error('Fehler beim Parsen der möglichen Antworten');
+				}
+			}
+
+			// Format the results - exclude initialization data and convert to numbers
+			const formattedResults = {};
+			Object.entries(resultsData).forEach(([key, value]) => {
+				if (key !== 'initialized') {
+					formattedResults[key] = parseInt(value as string, 10) || 0;
+				}
+			});
+
+			// Build question object
+			const questionObj: any = {
+				questionId,
+				type: questionData.type,
+				questionText: questionData.questionText,
+				possibleAnswers,
+				results: formattedResults,
+			};
+
+			// Add user answers if available
+			if (userKey && userAnswerData) {
+				try {
+					const userAnswers = JSON.parse(typeof userAnswerData === 'string' ? userAnswerData : '');
+					questionObj.userAnswers = Array.isArray(userAnswers) ? userAnswers : [userAnswers];
+				} catch {
+					questionObj.userAnswers = [userAnswerData];
+				}
+			}
+
+			questions.push(questionObj);
+		}
+
+		return {
+			success: true,
+			pollRunId,
+			questions,
+		};
+	} catch (error) {
+		console.error('Fehler beim Abrufen der Ergebnisse:', error);
+		return { success: false, error: 'Abrufen der Ergebnisse fehlgeschlagen' };
 	}
 }
 
