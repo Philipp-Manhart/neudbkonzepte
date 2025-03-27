@@ -11,10 +11,12 @@ import { useState } from 'react';
 import { EnterPollFormSchema } from '@/components/form-schemas';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function EnterPollForm() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
 
 	const form = useForm<z.infer<typeof EnterPollFormSchema>>({
 		resolver: zodResolver(EnterPollFormSchema),
@@ -32,6 +34,7 @@ export default function EnterPollForm() {
 			toast.error('Abstimmung beitreten fehlgeschlagen');
 		} else {
 			toast.success('Abbstimmung beitreten erfolgreich.');
+			router.push(`/participate/${values.enterCode}`);
 		}
 		setIsSubmitting(false);
 	}

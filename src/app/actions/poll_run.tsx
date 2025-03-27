@@ -305,7 +305,7 @@ export async function enterPollRun(enterCode: string, userKey?: string) {
 			await multi.exec();
 		}
 
-		redirect(`/poll/${enterCode}`);
+		//redirect(`/poll/${enterCode}`);
 	} catch (error) {
 		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);
 		return { success: false, error: 'Fehler beim Betreten des Abstimmungslaufs' };

@@ -28,6 +28,7 @@ export default function CreatePage() {
 			error: null,
 		},
 	]);
+	const [isSubmitting, setIsSubmitting] =useState<boolean>(false);
 
 	const validateForm = () => {
 		let isValid = true;
@@ -95,6 +96,8 @@ export default function CreatePage() {
 		};
 
 	async function handleSave() {
+
+		setIsSubmitting(true);
 		const isValid = validateForm();
 
 		if (isValid) {
@@ -107,6 +110,7 @@ export default function CreatePage() {
 			}
 			router.push('/my-polls');
 		}
+		setIsSubmitting(false);
 	}
 
 	return (
@@ -145,7 +149,7 @@ export default function CreatePage() {
 				<PlusCircle className="h-5 w-5" />
 				Neue Frage hinzufügen
 			</Button>
-			<Button onClick={handleSave}>Umfrage speichern</Button>
+			<Button onClick={handleSave} disabled={isSubmitting}>Umfrage speichern</Button>
 		</div>
 	);
 }
