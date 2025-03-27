@@ -27,7 +27,7 @@ export function PollCard({ poll }: pollCardProps) {
 		
 		setIsStarting(false);
 
-		if (newPollRun.success && newPollRun.pollRunId) {
+		if (newPollRun.pollRunId) {
 			router.push(`/poll-run/${newPollRun.pollRunId}`);
 		} else {
 			console.error('Failed to start poll:', newPollRun.error);
