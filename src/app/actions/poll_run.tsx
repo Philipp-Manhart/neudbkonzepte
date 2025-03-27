@@ -475,19 +475,3 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 		return { success: false, error: 'Abrufen der Ergebnisse fehlgeschlagen' };
 	}
 }
-
-// poll_run{id}:question:{id}:results
-//answer 1 --> count
-//answer 2 --> count
-//...
-
-//user:{id}:poll_run:{id}:question:{id} -> STRING or HASH
-//value: selected answer(s)
-
-//poll_run:{id}:participants -> SET
-//members: user IDs of participants
-
-//poll_run:{id}:question:{q_id} -> HASH
-//type: "single"
-//questionText: "What is..."
-//possibleAnswers: JSON array of options
