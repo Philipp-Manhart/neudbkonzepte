@@ -13,8 +13,8 @@ export default function SubmitAnswer({ onSubmit, isDisabled, buttonText }: Submi
 	};
 
 	return (
-		<div className="submit-answer-container">
-			<Button onClick={handleSubmit} disabled={isDisabled} className="submit-button">
+		<div className="flex justify-center mt-6">
+			<Button onClick={handleSubmit} disabled={isDisabled}>
 				{buttonText}
 			</Button>
 		</div>

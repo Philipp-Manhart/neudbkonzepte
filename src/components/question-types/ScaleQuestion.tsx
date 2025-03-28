@@ -14,11 +14,13 @@ interface ScaleQuestionProps {
 export default function ScaleQuestion({ questionId, questionText, onAnswerSelected, pollRunId }: ScaleQuestionProps) {
 	const [sliderValue, setSliderValue] = useState<number>(4); // Default to middle value
 	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [isSaved, setIsSaved] = useState<boolean>(false);
 
 	const handleSubmit = async () => {
 		try {
 			setIsSaving(true);
 			await saveUserAnswer(pollRunId, questionId, sliderValue.toString());
+			setIsSaved(true);
 		} catch (error) {
 			console.error('Error saving answer:', error);
 		} finally {
@@ -27,6 +29,9 @@ export default function ScaleQuestion({ questionId, questionText, onAnswerSelect
 	};
 
 	const handleValueChange = (value: number[]) => {
+		// Prevent changes if answer is already saved
+		if (isSaved) return;
+
 		const newValue = value[0];
 		setSliderValue(newValue);
 		if (onAnswerSelected) {
@@ -35,30 +40,36 @@ export default function ScaleQuestion({ questionId, questionText, onAnswerSelect
 	};
 
 	return (
-		<div className="py-4">
-			<h3 className="text-xl font-semibold mb-4">{questionText}</h3>
+		<div className="py-4 px-2 sm:px-0">
+			<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
 
-			<Slider min={1} max={7} step={1} value={[sliderValue]} onValueChange={handleValueChange} className="mb-6" />
-
-			<div className="flex justify-between text-sm mt-2">
-				<span>1</span>
-				<span>2</span>
-				<span>3</span>
-				<span>4</span>
-				<span>5</span>
-				<span>6</span>
-				<span>7</span>
-			</div>
-
-			<div className="text-center mt-4 text-lg font-medium">Selected value: {sliderValue}</div>
-
-			<div className="mt-6">
-				<SubmitAnswer
-					onSubmit={handleSubmit}
-					isDisabled={isSaving}
-					buttonText={isSaving ? 'Saving...' : 'Save Answer'}
+			<div className="max-w-md mx-auto sm:mx-0">
+				<Slider
+					min={1}
+					max={7}
+					step={1}
+					value={[sliderValue]}
+					onValueChange={handleValueChange}
+					className={`mb-6 ${isSaved ? 'opacity-80 pointer-events-none' : ''}`}
+					disabled={isSaved}
 				/>
+
+				<div className="flex justify-between text-sm mt-2 px-1">
+					<span>1</span>
+					<span>2</span>
+					<span>3</span>
+					<span>4</span>
+					<span>5</span>
+					<span>6</span>
+					<span>7</span>
+				</div>
 			</div>
+
+			<SubmitAnswer
+				onSubmit={handleSubmit}
+				isDisabled={isSaving || isSaved}
+				buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort Speichern'}
+			/>
 		</div>
 	);
 }
