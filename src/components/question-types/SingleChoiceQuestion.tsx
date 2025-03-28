@@ -20,6 +20,7 @@ export default function SingleChoiceQuestion({
 }: SingleChoiceQuestionProps) {
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [isSaved, setIsSaved] = useState<boolean>(false);
 
 	const handleSubmit = async () => {
 		if (!selectedOption) return;
@@ -27,6 +28,7 @@ export default function SingleChoiceQuestion({
 		try {
 			setIsSaving(true);
 			await saveUserAnswer(pollRunId, questionId, selectedOption);
+			setIsSaved(true);
 		} catch (error) {
 			console.error('Error saving answer:', error);
 		} finally {
@@ -35,6 +37,9 @@ export default function SingleChoiceQuestion({
 	};
 
 	const handleOptionClick = (option: string) => {
+		// Prevent changes if answer is already saved
+		if (isSaved) return;
+
 		setSelectedOption(option);
 		if (onAnswerSelected) {
 			onAnswerSelected(option);
@@ -42,17 +47,17 @@ export default function SingleChoiceQuestion({
 	};
 
 	return (
-		<div>
-			<h3 className="text-xl font-semibold mb-4">{questionText}</h3>
+		<div className="py-4 px-2 sm:px-0">
+			<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
 
-			<ul className="space-y-2">
+			<ul className="space-y-2 max-w-md mx-auto sm:mx-0">
 				{options.map((option, index) => (
 					<li
 						key={index}
 						onClick={() => handleOptionClick(option)}
-						className={`border p-3 rounded-md cursor-pointer transition-all ${
+						className={`border p-3 rounded-md transition-all ${
 							selectedOption === option ? 'bg-amber-100 border-amber-500' : 'hover:bg-gray-50'
-						}`}>
+						} ${isSaved ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
 						<div className="flex items-center">
 							<div
 								className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
@@ -60,19 +65,17 @@ export default function SingleChoiceQuestion({
 								}`}>
 								{selectedOption === option && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
 							</div>
-							<span>{option}</span>
+							<span className="text-sm sm:text-base">{option}</span>
 						</div>
 					</li>
 				))}
 			</ul>
 
-			<div className="mt-4">
-				<SubmitAnswer
-					onSubmit={handleSubmit}
-					isDisabled={isSaving || !selectedOption}
-					buttonText={isSaving ? 'Saving...' : 'Save Answer'}
-				/>
-			</div>
+			<SubmitAnswer
+				onSubmit={handleSubmit}
+				isDisabled={isSaving || !selectedOption || isSaved}
+				buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort speichern'}
+			/>
 		</div>
 	);
 }

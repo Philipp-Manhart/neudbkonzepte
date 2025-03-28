@@ -21,7 +21,7 @@ export function PollCard({ poll }: pollCardProps) {
 
 	async function handleStartPoll() {
 		setIsStarting(true);
-		const newPollRun = await createPollRun(poll.pollId);
+		const newPollRun = await createPollRun(poll.pollId as string);
 
 		//const result = await startPollRun(newPollRun.pollRunId as string)
 		
