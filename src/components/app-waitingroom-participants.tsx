@@ -11,13 +11,12 @@ interface WaitingRoomOwnerProps {
 	}[];
 }
 
-export default function ParticipantWaitingRoom({ questionsCount, participants }: WaitingRoomOwnerProps) {
-
+export default function ParticipantWaitingRoom({ pollRunId, questionsCount, participants }: WaitingRoomOwnerProps) {
 	return (
 		<div className="flex flex-col items-center p-6 max-w-3xl mx-auto">
 			<h1 className="text-2xl font-bold mb-6">Warte bis die Umfrage gestartet wird.</h1>
 
-			<ParticipantListWaitingRoom questionsCount={questionsCount} participants={participants}/>
+			<ParticipantListWaitingRoom pollRunId={pollRunId} questionsCount={questionsCount} participants={participants} />
 		</div>
 	);
 }

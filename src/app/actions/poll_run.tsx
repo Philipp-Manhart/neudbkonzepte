@@ -1,7 +1,6 @@
 'use server';
 import { redis } from '@/lib/redis';
 import { customAlphabet } from 'nanoid';
-import { redirect } from 'next/navigation';
 import { pollIdConverter, keyConverter, pollRunIdConverter } from '@/lib/converter';
 
 // ids as return converter etc.
@@ -12,22 +11,22 @@ export async function createPollRun(pollId: string) {
 	const pollRunKey = await pollRunIdConverter(pollRunId);
 
 	try {
-		const multi = redis.multi();
-
-		const duration = await redis.hGet(pollKey, 'defaultduration');
-		const questionCount = await redis.zCard(`${pollKey}:questions`);
-		const runDuration = Date.now() + parseInt(duration || '0') * questionCount;
-
-		multi.hSet(pollRunKey, {
-			pollKey,
+		// Set basic poll run information
+		await redis.hSet(pollRunKey, {
+			pollKey: String(pollKey),
 			status: 'open',
-			created: Date.now(),
-			runDuration,
-			participantsCount: 0,
+			created: String(Date.now()),
+			runDuration: String(
+				Date.now() +
+					parseInt((await redis.hGet(pollKey, 'defaultduration')) || '0') * (await redis.zCard(`${pollKey}:questions`))
+			),
+			participantsCount: '0',
 		});
 
-		multi.zAdd(`${pollKey}:poll_runs`, { score: Date.now(), value: pollRunKey });
+		// Add poll run to poll's list
+		await redis.zAdd(`${pollKey}:poll_runs`, { score: Date.now(), value: pollRunKey as string });
 
+		// Get and process questions
 		const questionKeys = await redis.zRange(`${pollKey}:questions`, 0, -1);
 
 		for (const questionKey of questionKeys) {
@@ -35,24 +34,45 @@ export async function createPollRun(pollId: string) {
 			if (Object.keys(questionData).length) {
 				const questionId = await keyConverter(questionKey);
 
-				multi.hSet(`${pollRunKey}:question:${questionId}`, {
-					type: questionData.type,
-					questionText: questionData.text,
-					possibleAnswers: questionData.options,
+				// Ensure possibleAnswers is properly stringified
+				let possibleAnswers = '';
+
+				try {
+					if (questionData.options) {
+						if (typeof questionData.options === 'string') {
+							// Try to parse it to verify it's valid JSON, then use as is
+							JSON.parse(questionData.options);
+							possibleAnswers = questionData.options;
+						} else {
+							// Otherwise stringify it
+							possibleAnswers = JSON.stringify(questionData.options);
+						}
+					}
+				} catch {
+					// If any error in parsing, stringify it
+					possibleAnswers = JSON.stringify(questionData.options || '[]');
+				}
+
+				// Store question data for poll run
+				await redis.hSet(`${pollRunKey}:question:${questionId}`, {
+					type: questionData.type || 'single',
+					questionText: questionData.text || '',
+					possibleAnswers: possibleAnswers,
 				});
 
-				multi.hSet(`${pollRunKey}:question:${questionId}:results`, {
-					initialized: Date.now(),
+				// Initialize question results
+				await redis.hSet(`${pollRunKey}:question:${questionId}:results`, {
+					initialized: String(Date.now()),
 				});
 
-				multi.zAdd(`${pollRunKey}:questions`, {
+				// Add question to poll run's question list
+				await redis.zAdd(`${pollRunKey}:questions`, {
 					score: parseInt(questionData.position as string) || 0,
-					value: questionId,
+					value: questionId as string,
 				});
 			}
 		}
 
-		await multi.exec();
 		return { success: true, pollRunId };
 	} catch (error) {
 		console.error('Fehler beim Erstellen des Abstimmungslaufs:', error);
@@ -243,7 +263,8 @@ export async function getPollRunsByParticipant(userKey: string) {
 			const pollRunKey = pollRunKeys[index];
 			const pollRunId = await keyConverter(pollRunKey);
 
-			const pollId = pollRunData.pollKey ? await keyConverter(pollRunData.pollKey) : '';
+			const pollKey = (pollRunData as Record<string, string>).pollKey;
+			const pollId = pollKey ? await keyConverter(pollKey) : '';
 
 			return {
 				...pollRunData,
@@ -269,9 +290,10 @@ export async function deletePollRun(pollRunId: string) {
 		}
 
 		const multi = redis.multi();
+		const pollKey = pollRun.pollKey as string;
 
 		multi.del(pollRunKey);
-		multi.zRem(`${pollRun.pollKey}:poll_runs`, pollRunKey);
+		multi.zRem(`${pollKey}:poll_runs`, pollRunKey);
 
 		await multi.exec();
 		return { success: true };
@@ -293,19 +315,34 @@ export async function enterPollRun(enterCode: string, userKey?: string) {
 			return { success: false, error: 'Abstimmungslauf ist nicht geöffnet' };
 		}
 
+		// Increment participants count
 		await redis.hIncrBy(pollRunKey, 'participantsCount', 1);
+
+		// Get the updated count
+		const newParticipantsCount = await redis.hGet(pollRunKey, 'participantsCount');
+
+		// Publish update to subscribers
+		await redis.publish(
+			`poll-run:${enterCode}:updates`,
+			JSON.stringify({
+				event: 'participant-update',
+				data: { participantsCount: newParticipantsCount },
+			})
+		);
 
 		if (userKey) {
 			const multi = redis.multi();
 			multi.sAdd(`${pollRunKey}:participants`, userKey);
 			multi.zAdd(`${userKey}:participations`, {
 				score: Date.now(),
-				value: pollRunKey,
+				value: pollRunKey as string,
 			});
 			await multi.exec();
 		}
 
+		// This was commented out but kept the comment explicitly
 		//redirect(`/poll/${enterCode}`);
+		return { success: true, pollRunId: enterCode };
 	} catch (error) {
 		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);
 		return { success: false, error: 'Fehler beim Betreten des Abstimmungslaufs' };
@@ -367,7 +404,7 @@ export async function saveUserAnswer(
 					for (const prevAnswer of previousAnswers) {
 						multi.hIncrBy(resultsKey, prevAnswer, -1);
 					}
-				} catch (e) {
+				} catch {
 					// If parsing fails, assume it was a single string answer
 					multi.hIncrBy(resultsKey, previousAnswersData, -1);
 				}
@@ -412,18 +449,21 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 			const questionKey = `${pollRunKey}:question:${questionId}`;
 			const resultsKey = `${pollRunKey}:question:${questionId}:results`;
 
-			// Prepare and execute all promises concurrently
-			const promises = [redis.hGetAll(questionKey), redis.hGetAll(resultsKey)];
+			const questionDataPromise = redis.hGetAll(questionKey);
+			const resultsDataPromise = redis.hGetAll(resultsKey);
 
-			// Only add user answer query if userKey is provided
+			let userAnswerPromise: Promise<string | null> | undefined;
 			if (userKey) {
-				promises.push(redis.get(`${userKey}:poll_run:${pollRunId}:question:${questionId}`));
+				userAnswerPromise = redis.get(`${userKey}:poll_run:${pollRunId}:question:${questionId}`);
 			}
 
-			const results = await Promise.all(promises);
-			const questionData = results[0];
-			const resultsData = results[1];
-			const userAnswerData = userKey ? results[2] : null;
+			const [questionData, resultsData, userAnswerData] = await Promise.all(
+				[questionDataPromise, resultsDataPromise, userAnswerPromise].filter(Boolean) as [
+					Promise<Record<string, string>>,
+					Promise<Record<string, string>>,
+					(Promise<string | null> | undefined)?
+				]
+			);
 
 			// Parse possible answers with error handling
 			let possibleAnswers = [];
@@ -436,7 +476,7 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 			}
 
 			// Format the results - exclude initialization data and convert to numbers
-			const formattedResults = {};
+			const formattedResults: Record<string, number> = {};
 			Object.entries(resultsData).forEach(([key, value]) => {
 				if (key !== 'initialized') {
 					formattedResults[key] = parseInt(value as string, 10) || 0;
@@ -444,7 +484,14 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 			});
 
 			// Build question object
-			const questionObj: any = {
+			const questionObj: {
+				questionId: string;
+				type: string;
+				questionText: string;
+				possibleAnswers: unknown[];
+				results: Record<string, number>;
+				userAnswers?: string[];
+			} = {
 				questionId,
 				type: questionData.type,
 				questionText: questionData.questionText,

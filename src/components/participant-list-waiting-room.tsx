@@ -1,4 +1,10 @@
-interface ParticipantWaitingRoomProps {
+'use client';
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { useParticipantsSSE } from '@/hooks/use-participants-sse';
+
+interface ParticipantListWaitingRoomProps {
+	pollRunId: string;
 	questionsCount: number;
 	participants: {
 		id: number;
@@ -6,24 +12,29 @@ interface ParticipantWaitingRoomProps {
 	}[];
 }
 
-export default function ParticipantListWaitingRoom({ questionsCount, participants }: ParticipantWaitingRoomProps) {
-	return (
-		<>
-			<div className="w-full p-4 rounded-lg mb-6">
-				<p className="text-lg mb-2">Anzahl Fragen: {questionsCount}</p>
-				<p className="text-lg">Teilnehmer bisher: {participants.length}</p>
-			</div>
+export default function ParticipantListWaitingRoom({
+	pollRunId,
+	questionsCount,
+	participants: initialParticipants,
+}: ParticipantListWaitingRoomProps) {
+	// Use our SSE hook to get real-time participant count
+	const { participantsCount, loading } = useParticipantsSSE(pollRunId);
 
-			<div className="w-full">
-				<h2 className="text-xl font-semibold mb-3">Teilnehmer:</h2>
-				<ul className="border rounded-lg divide-y ">
-					{participants.map((participant) => (
-						<li key={participant.id} className="px-4 py-3">
-							{participant.name || 'Anonym'}
-						</li>
-					))}
-				</ul>
+	// Calculate placeholder values
+	const actualParticipantsCount = loading ? initialParticipants.length.toString() : participantsCount;
+
+	return (
+		<Card className="w-full p-6 mb-8">
+			<div className="flex flex-col">
+				<div className="flex justify-between mb-4">
+					<span className="text-lg font-medium">Anzahl der Fragen</span>
+					<span className="text-lg">{questionsCount}</span>
+				</div>
+				<div className="flex justify-between">
+					<span className="text-lg font-medium">Anzahl der Teilnehmer</span>
+					<span className="text-lg">{actualParticipantsCount}</span>
+				</div>
 			</div>
-		</>
+		</Card>
 	);
 }

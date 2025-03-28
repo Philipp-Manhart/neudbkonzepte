@@ -29,7 +29,7 @@ export default function OwnerWaitingRoom({ questionsCount, participants, pollRun
 		<div className="flex flex-col items-center p-6 max-w-3xl mx-auto">
 			<h1 className="text-2xl font-bold mb-6">Beginne die Umfrage sobald du willst.</h1>
 
-			<ParticipantListWaitingRoom questionsCount={questionsCount} participants={participants}/>
+			<ParticipantListWaitingRoom pollRunId={pollRunId} questionsCount={questionsCount} participants={participants} />
 			<div className="pt-5">
 				<Button onClick={handleStartPoll} disabled={isStarting}>
 					<Play />
