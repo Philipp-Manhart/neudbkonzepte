@@ -66,9 +66,13 @@ export default function MyParticipations() {
 	}, [userKey]);
 
 	return (
-		<div className="container mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-6">Meine Teilnahmen</h1>
-			{loading ? <p>Lade Teilnahmen...</p> : <ParticipationList participations={participations} />}
+		<div className="container mx-auto py-8 px-4">
+			<h1 className="text-3xl font-bold mb-6 text-center">Meine Teilnahmen</h1>
+			{loading ? (
+				<p className="text-center">Lade Teilnahmen...</p>
+			) : (
+				<ParticipationList participations={participations} isOwner={false} />
+			)}
 		</div>
 	);
 }

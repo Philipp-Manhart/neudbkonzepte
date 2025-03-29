@@ -24,24 +24,28 @@ export function ParticipationCard({ participation, isOwner }: ParticipationCardP
 	const redirectViewLink = `/poll-result/${participation.pollRunId}`;
 
 	return (
-		<Card className="w-full max-w-3xl mb-4">
-			<CardHeader className="flex flex-row items-center justify-between">
+		<Card className="h-full flex flex-col">
+			<CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
 				<h2 className="text-2xl font-bold">{participation.pollName}</h2>
 				<div className="text-sm text-muted-foreground">
 					{new Date(participation.participatedAt).toLocaleDateString()}
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-4">
-				<div className="flex items-center gap-2">
-					<CalendarIcon className="h-4 w-4 text-muted-foreground" />
-					<label className="text-base font-medium text-muted-foreground">Beschreibung:</label>
-					<p className="text-lg">{participation.description}</p>
+			<CardContent className="space-y-4 flex-grow">
+				<div className="flex flex-col space-y-1">
+					<div className="flex items-center gap-2">
+						<CalendarIcon className="h-4 w-4 text-muted-foreground" />
+						<label className="text-base font-medium text-muted-foreground">Beschreibung:</label>
+					</div>
+					<p className="text-lg pl-6">{participation.description}</p>
 				</div>
 
-				<div className="flex items-center gap-2">
-					<UsersIcon className="h-4 w-4 text-muted-foreground" />
-					<label className="text-base font-medium text-muted-foreground">Anzahl Teilnehmer:</label>
-					<p className="text-lg">{participation.participants}</p>
+				<div className="flex flex-col space-y-1">
+					<div className="flex items-center gap-2">
+						<UsersIcon className="h-4 w-4 text-muted-foreground" />
+						<label className="text-base font-medium text-muted-foreground">Anzahl Teilnehmer:</label>
+					</div>
+					<p className="text-lg pl-6">{participation.participants}</p>
 				</div>
 			</CardContent>
 			<CardFooter className="flex pt-2 gap-2 w-full">

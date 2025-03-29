@@ -23,7 +23,6 @@ export default function MyParticipations() {
 					const enhancedPollRuns = await Promise.all(
 						realParticipations.pollRuns.map(async (pollRun) => {
 							try {
-
 								// Extract pollId from the response
 								const pollId = pollRun.pollKey.split(':')[1];
 
@@ -62,10 +61,10 @@ export default function MyParticipations() {
 	}, [userKey]);
 
 	return (
-		<div className="container mx-auto py-8">
-			<h1 className="text-3xl font-bold mb-6">Meine Umfragendurchläufe</h1>
+		<div className="container mx-auto py-8 px-4">
+			<h1 className="text-3xl font-bold mb-6 text-center">Meine Umfragendurchläufe</h1>
 			{loading ? (
-				<p>Lade Umfragendurchläufe...</p>
+				<p className="text-center">Lade Umfragendurchläufe...</p>
 			) : (
 				<ParticipationList participations={participations} isOwner={true} />
 			)}
