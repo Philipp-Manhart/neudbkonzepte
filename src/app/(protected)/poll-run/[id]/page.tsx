@@ -3,6 +3,7 @@ import { getPollRun } from '@/app/actions/poll_run';
 import { getQuestionsByPollId } from '@/app/actions/question';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
 import OwnerWaitingRoom from '@/components/app-waitingroom-creator';
+import QuestionDisplay from '@/components/question-display';
 
 const mockParticipants = [
 	{ id: 1, name: 'Max Mustermann' },
@@ -20,7 +21,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
 	const responseQuestions = await getQuestionsByPollId(responsePoll.pollRun?.pollId as string);
 
-  const poll = await getPoll(responsePoll.pollRun?.pollId as string);
+	const poll = await getPoll(responsePoll.pollRun?.pollId as string);
 
 	const questionsCount = responseQuestions.questions?.length;
 
@@ -42,9 +43,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 	}
 
 	if (responsePoll.pollRun?.status === 'running') {
-
 		return (
-			<QuestionVotesChart title={currentQuestion.questionText} chartData={chartData}/>
+			<QuestionDisplay
+				questions={responseQuestions.questions}
+				pollRunId={id}
+				defaultDuration={poll.defaultduration}
+				isOwner={true}
+			/>
 		);
 	}
 }

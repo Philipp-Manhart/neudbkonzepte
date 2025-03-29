@@ -4,6 +4,8 @@ import ScaleQuestion from './question-types/ScaleQuestion';
 import SingleChoiceQuestion from './question-types/SingleChoiceQuestion';
 import MultipleChoiceQuestion from './question-types/MultipleChoiceQuestion';
 import YesNoQuestion from './question-types/YesNoQuestion';
+import { useCurrentQuestionSSE } from '@/hooks/use-current-question-sse';
+import { updateCurrentQuestion } from '@/app/actions/poll_run';
 
 interface Question {
 	id: string;
@@ -17,22 +19,56 @@ interface QuestionDisplayProps {
 	questions: any[];
 	pollRunId: string;
 	defaultDuration: number;
+	isOwner?: boolean;
 }
 
-export default function QuestionDisplay({ questions, pollRunId, defaultDuration }: QuestionDisplayProps) {
+export default function QuestionDisplay({
+	questions,
+	pollRunId,
+	defaultDuration,
+	isOwner = false,
+}: QuestionDisplayProps) {
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 	const [timeLeft, setTimeLeft] = useState<number>(parseInt(defaultDuration as any) || 30);
 	const [pollCompleted, setPollCompleted] = useState(false);
+	const [isAdvancing, setIsAdvancing] = useState(false);
 
 	const updateInProgress = useRef(false);
-
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+	// Use the SSE hook to listen for question updates
+	const { currentQuestionIndex: sseQuestionIndex, error: sseError } = useCurrentQuestionSSE(pollRunId, (data) => {
+		const newIndex = parseInt(data.currentQuestionIndex);
+		console.log(`Received question update from SSE: ${newIndex}`);
+
+		// Reset timer when question changes via SSE
+		if (newIndex !== currentQuestionIndex) {
+			setTimeLeft(defaultDuration);
+		}
+	});
+
+	// When the SSE index changes, update our local state
+	useEffect(() => {
+		// Only update if the SSE index is different from our current index
+		if (sseQuestionIndex !== currentQuestionIndex) {
+			console.log(`Updating from SSE: ${sseQuestionIndex}`);
+			setCurrentQuestionIndex(sseQuestionIndex);
+			setTimeLeft(defaultDuration);
+
+			// Check if we've completed the poll
+			if (sseQuestionIndex >= questions.length) {
+				setPollCompleted(true);
+			}
+		}
+	}, [sseQuestionIndex, currentQuestionIndex, questions.length, defaultDuration]);
 
 	const currentQuestion = currentQuestionIndex < questions.length ? questions[currentQuestionIndex] : null;
 
-	const advanceToNextQuestion = () => {
-		if (updateInProgress.current) return;
+	// Function to advance to the next question (for timer or manual navigation)
+	const advanceToNextQuestion = async () => {
+		if (updateInProgress.current || isAdvancing) return;
 
+		setIsAdvancing(true);
 		updateInProgress.current = true;
 
 		if (timerRef.current) {
@@ -42,19 +78,54 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 
 		if (currentQuestionIndex < questions.length - 1) {
 			console.log(`Advancing from question ${currentQuestionIndex} to ${currentQuestionIndex + 1}`);
-			setCurrentQuestionIndex((prev) => prev + 1);
-			setTimeLeft(defaultDuration);
+
+			if (isOwner) {
+				// If the user is the poll owner, use the server action to update the question
+				const result = await updateCurrentQuestion(pollRunId, 'next');
+				if (!result.success) {
+					console.error('Failed to advance question:', result.error);
+				}
+			} else {
+				// For participants, just update the local state
+				setCurrentQuestionIndex((prev) => prev + 1);
+				setTimeLeft(defaultDuration);
+			}
 		} else {
 			console.log('All questions completed');
 			setPollCompleted(true);
+
+			// If owner, update the server state to mark the poll as completed
+			if (isOwner) {
+				// Optional: Add server action to mark poll as completed
+			}
 		}
 
 		// Allow updates again after a short delay
 		setTimeout(() => {
 			updateInProgress.current = false;
+			setIsAdvancing(false);
 		}, 50);
 	};
 
+	// Go to previous question (only available for poll owner)
+	const goToPreviousQuestion = async () => {
+		if (updateInProgress.current || isAdvancing || !isOwner || currentQuestionIndex <= 0) return;
+
+		setIsAdvancing(true);
+		updateInProgress.current = true;
+
+		const result = await updateCurrentQuestion(pollRunId, 'previous');
+		if (!result.success) {
+			console.error('Failed to go to previous question:', result.error);
+		}
+
+		setTimeout(() => {
+			updateInProgress.current = false;
+			setIsAdvancing(false);
+		}, 50);
+	};
+
+	// Timer effect
 	useEffect(() => {
 		if (pollCompleted || !questions.length || currentQuestionIndex >= questions.length) {
 			return;
@@ -69,7 +140,10 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 				const newTime = prevTime - 1;
 
 				if (newTime <= 0) {
-					setTimeout(advanceToNextQuestion, 10);
+					// If timer ends and user is an owner, advance the question on the server
+					if (isOwner) {
+						setTimeout(advanceToNextQuestion, 10);
+					}
 					return 0;
 				}
 				return newTime;
@@ -82,7 +156,7 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 				timerRef.current = null;
 			}
 		};
-	}, );
+	}, [pollCompleted, questions.length, currentQuestionIndex, isOwner]);
 
 	if (!questions || questions.length === 0) {
 		return <div className="flex justify-center items-center h-screen">No questions available</div>;
@@ -108,8 +182,13 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 	const renderQuestionComponent = () => {
 		switch (currentQuestion.type) {
 			case 'scale':
-				return <ScaleQuestion questionId={currentQuestion.questionId} questionText={currentQuestion.questionText} pollRunId={pollRunId}/>;
-
+				return (
+					<ScaleQuestion
+						questionId={currentQuestion.questionId}
+						questionText={currentQuestion.questionText}
+						pollRunId={pollRunId}
+					/>
+				);
 			case 'single-choice':
 				return (
 					<SingleChoiceQuestion
@@ -119,7 +198,6 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 						pollRunId={pollRunId}
 					/>
 				);
-
 			case 'multiple-choice':
 				return (
 					<MultipleChoiceQuestion
@@ -129,7 +207,6 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 						pollRunId={pollRunId}
 					/>
 				);
-
 			case 'yes-no':
 				return (
 					<YesNoQuestion
@@ -138,7 +215,6 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 						pollRunId={pollRunId}
 					/>
 				);
-
 			default:
 				return (
 					<div>
@@ -182,12 +258,42 @@ export default function QuestionDisplay({ questions, pollRunId, defaultDuration 
 							style={{ width: `${(timeLeft * 100) / (parseInt(defaultDuration as any) || 30)}%` }}></div>
 					</div>
 
-					{/* Debug button to manually advance questions during testing */}
-					{process.env.NODE_ENV === 'development' && (
+					{/* Navigation controls for poll owner */}
+					{isOwner && (
+						<div className="flex justify-between mt-6">
+							<button
+								onClick={goToPreviousQuestion}
+								disabled={currentQuestionIndex <= 0 || isAdvancing}
+								className={`px-4 py-2 rounded ${
+									currentQuestionIndex <= 0 || isAdvancing
+										? 'bg-gray-300 text-gray-500'
+										: 'bg-blue-500 text-white hover:bg-blue-600'
+								}`}>
+								Previous Question
+							</button>
+
+							<button
+								onClick={advanceToNextQuestion}
+								disabled={currentQuestionIndex >= questions.length - 1 || isAdvancing}
+								className={`px-4 py-2 rounded ${
+									currentQuestionIndex >= questions.length - 1 || isAdvancing
+										? 'bg-gray-300 text-gray-500'
+										: 'bg-blue-500 text-white hover:bg-blue-600'
+								}`}>
+								Next Question
+							</button>
+						</div>
+					)}
+
+					{/* Debug button to manually advance questions during development */}
+					{process.env.NODE_ENV === 'development' && !isOwner && (
 						<button onClick={advanceToNextQuestion} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
 							Next Question (Debug)
 						</button>
 					)}
+
+					{/* Display SSE error if any */}
+					{sseError && <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">Connection error: {sseError}</div>}
 				</div>
 			</div>
 		</div>

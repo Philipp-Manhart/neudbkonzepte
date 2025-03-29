@@ -72,22 +72,45 @@ export async function GET(request: Request, { params }: { params: { pollRunId: s
 			request.signal.addEventListener('abort', abortHandler);
 
 			try {
-				// Send initial participant count
+				// Send initial participant count and current question index
 				const participantsCount = await redis.hGet(pollRunKey, 'participantsCount');
+				const currentQuestionIndex = (await redis.hGet(pollRunKey, 'currentQuestionIndex')) || '0';
+				const questionsCount = await redis.zCard(`${pollRunKey}:questions`);
 
-				// Send the initial count
-				const initialData = {
+				// Send the initial participant count
+				const initialParticipantData = {
 					event: 'participant-update',
 					data: { participantsCount: participantsCount || '0' },
 				};
-				controller.enqueue(encoder.encode(`data: ${JSON.stringify(initialData)}\n\n`));
+				controller.enqueue(encoder.encode(`data: ${JSON.stringify(initialParticipantData)}\n\n`));
 
-				// Subscribe to participant updates
+				// Send the initial question index
+				const initialQuestionData = {
+					event: 'question-update',
+					data: {
+						currentQuestionIndex,
+						isLastQuestion: parseInt(currentQuestionIndex) === questionsCount - 1,
+					},
+				};
+				controller.enqueue(
+					encoder.encode(`event: question-update\ndata: ${JSON.stringify(initialQuestionData.data)}\n\n`)
+				);
+
+				// Subscribe to poll run updates
 				await subscriber.subscribe(`poll-run:${pollRunId}:updates`, (message) => {
 					try {
 						// Only enqueue if cleanup hasn't started
 						if (!cleanupInitiated) {
-							controller.enqueue(encoder.encode(`data: ${message}\n\n`));
+							const messageData = JSON.parse(message);
+
+							// Format the message as an SSE event based on its type
+							if (messageData.event === 'question-update') {
+								controller.enqueue(
+									encoder.encode(`event: question-update\ndata: ${JSON.stringify(messageData.data)}\n\n`)
+								);
+							} else {
+								controller.enqueue(encoder.encode(`data: ${message}\n\n`));
+							}
 						}
 					} catch (error) {
 						console.error('Error processing message:', error);
