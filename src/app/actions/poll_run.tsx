@@ -340,8 +340,6 @@ export async function enterPollRun(enterCode: string, userKey?: string) {
 			await multi.exec();
 		}
 
-		// This was commented out but kept the comment explicitly
-		//redirect(`/poll/${enterCode}`);
 		return { success: true, pollRunId: enterCode };
 	} catch (error) {
 		console.error('Fehler beim Betreten des Abstimmungslaufs:', error);

@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 
 export default async function Login() {
 	const redirectUrl = (await cookies()).get('redirectUrl')?.value || '';
-	const isFromPoll = redirectUrl.includes('/poll/');
+	const isFromPoll = redirectUrl.includes('/participate/');
 
 	return (
 		<div className="flex flex-col items-center pt-[25vh]">
