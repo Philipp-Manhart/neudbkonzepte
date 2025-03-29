@@ -10,6 +10,7 @@ interface SingleChoiceQuestionProps {
 	options: string[];
 	onAnswerSelected?: (value: string) => void;
 	pollRunId: string;
+	isOwner?: boolean;
 }
 
 export default function SingleChoiceQuestion({
@@ -18,6 +19,7 @@ export default function SingleChoiceQuestion({
 	options,
 	onAnswerSelected,
 	pollRunId,
+	isOwner = false,
 }: SingleChoiceQuestionProps) {
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -28,6 +30,16 @@ export default function SingleChoiceQuestion({
 		option,
 		votes: Math.floor(Math.random() * 10) + 1, // Random votes between 1-10
 	}));
+
+	// Show chart immediately if user is the owner
+	if (isOwner || isSaved) {
+		return (
+			<div className="py-4 px-2 sm:px-0">
+				<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
+				<QuestionVotesChart title={questionText} chartData={mockChartData} />
+			</div>
+		);
+	}
 
 	const handleSubmit = async () => {
 		if (!selectedOption) return;
@@ -57,38 +69,32 @@ export default function SingleChoiceQuestion({
 		<div className="py-4 px-2 sm:px-0">
 			<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
 
-			{isSaved ? (
-				<QuestionVotesChart title={questionText} chartData={mockChartData} />
-			) : (
-				<>
-					<ul className="space-y-2 max-w-md mx-auto sm:mx-0">
-						{options.map((option, index) => (
-							<li
-								key={index}
-								onClick={() => handleOptionClick(option)}
-								className={`border p-3 rounded-md transition-all ${
-									selectedOption === option ? 'bg-amber-100 border-amber-500' : 'hover:bg-gray-50'
-								} ${isSaved ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
-								<div className="flex items-center">
-									<div
-										className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
-											selectedOption === option ? 'border-amber-500' : 'border-gray-400'
-										}`}>
-										{selectedOption === option && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
-									</div>
-									<span className="text-sm sm:text-base">{option}</span>
-								</div>
-							</li>
-						))}
-					</ul>
+			<ul className="space-y-2 max-w-md mx-auto sm:mx-0">
+				{options.map((option, index) => (
+					<li
+						key={index}
+						onClick={() => handleOptionClick(option)}
+						className={`border p-3 rounded-md transition-all ${
+							selectedOption === option ? 'bg-amber-100 border-amber-500' : 'hover:bg-gray-50'
+						} ${isSaved ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
+						<div className="flex items-center">
+							<div
+								className={`w-4 h-4 rounded-full border mr-3 flex items-center justify-center ${
+									selectedOption === option ? 'border-amber-500' : 'border-gray-400'
+								}`}>
+								{selectedOption === option && <div className="w-2 h-2 rounded-full bg-amber-500"></div>}
+							</div>
+							<span className="text-sm sm:text-base">{option}</span>
+						</div>
+					</li>
+				))}
+			</ul>
 
-					<SubmitAnswer
-						onSubmit={handleSubmit}
-						isDisabled={isSaving || !selectedOption || isSaved}
-						buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort speichern'}
-					/>
-				</>
-			)}
+			<SubmitAnswer
+				onSubmit={handleSubmit}
+				isDisabled={isSaving || !selectedOption || isSaved}
+				buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort speichern'}
+			/>
 		</div>
 	);
 }

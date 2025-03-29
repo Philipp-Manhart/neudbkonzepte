@@ -1,6 +1,6 @@
 'use client';
 
-import { Ticket, Vote, FilePlus, Library, User } from 'lucide-react';
+import { Ticket, Vote, FilePlus, Library, User, LucidePaperclip } from 'lucide-react';
 
 import {
 	Sidebar,
@@ -46,6 +46,12 @@ const profile = {
 	icon: User,
 };
 
+const myPollRuns ={
+	title: 'Meine Durchführungen',
+	url: '/my-poll-runs',
+	icon: LucidePaperclip,
+}
+
 export function AppSidebar() {
 	const pathname = usePathname();
 
@@ -85,6 +91,14 @@ export function AppSidebar() {
 									<Link href={createPoll.url}>
 										<createPoll.icon />
 										<span>{createPoll.title}</span>{' '}
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+							<SidebarMenuItem key={myPollRuns.title}>
+								<SidebarMenuButton asChild {...(pathname === myPollRuns.url ? { isActive: true } : {})}>
+									<Link href={myPollRuns.url}>
+										<createPoll.icon />
+										<span>{myPollRuns.title}</span>{' '}
 									</Link>
 								</SidebarMenuButton>
 							</SidebarMenuItem>

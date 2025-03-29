@@ -10,9 +10,16 @@ interface ScaleQuestionProps {
 	questionText: string;
 	onAnswerSelected?: (value: number) => void;
 	pollRunId: string;
+	isOwner?: boolean;
 }
 
-export default function ScaleQuestion({ questionId, questionText, onAnswerSelected, pollRunId }: ScaleQuestionProps) {
+export default function ScaleQuestion({
+	questionId,
+	questionText,
+	onAnswerSelected,
+	pollRunId,
+	isOwner = false,
+}: ScaleQuestionProps) {
 	const [sliderValue, setSliderValue] = useState<number>(4); // Default to middle value
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -28,6 +35,17 @@ export default function ScaleQuestion({ questionId, questionText, onAnswerSelect
 		{ option: '7', votes: 3 },
 	];
 
+	// Show chart immediately if user is the owner
+	if (isOwner || isSaved) {
+		return (
+			<div className="py-4 px-2 sm:px-0">
+				<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
+				<QuestionVotesChart title={questionText} chartData={mockChartData} />
+			</div>
+		);
+	}
+
+	// Rest of the component for participants
 	const handleSubmit = async () => {
 		try {
 			setIsSaving(true);
@@ -55,39 +73,33 @@ export default function ScaleQuestion({ questionId, questionText, onAnswerSelect
 		<div className="py-4 px-2 sm:px-0">
 			<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
 
-			{isSaved ? (
-				<QuestionVotesChart title={questionText} chartData={mockChartData} />
-			) : (
-				<>
-					<div className="max-w-md mx-auto sm:mx-0">
-						<Slider
-							min={1}
-							max={7}
-							step={1}
-							value={[sliderValue]}
-							onValueChange={handleValueChange}
-							className={`mb-6 ${isSaved ? 'opacity-80 pointer-events-none' : ''}`}
-							disabled={isSaved}
-						/>
+			<div className="max-w-md mx-auto sm:mx-0">
+				<Slider
+					min={1}
+					max={7}
+					step={1}
+					value={[sliderValue]}
+					onValueChange={handleValueChange}
+					className={`mb-6 ${isSaved ? 'opacity-80 pointer-events-none' : ''}`}
+					disabled={isSaved}
+				/>
 
-						<div className="flex justify-between text-sm mt-2 px-1">
-							<span>1</span>
-							<span>2</span>
-							<span>3</span>
-							<span>4</span>
-							<span>5</span>
-							<span>6</span>
-							<span>7</span>
-						</div>
-					</div>
+				<div className="flex justify-between text-sm mt-2 px-1">
+					<span>1</span>
+					<span>2</span>
+					<span>3</span>
+					<span>4</span>
+					<span>5</span>
+					<span>6</span>
+					<span>7</span>
+				</div>
+			</div>
 
-					<SubmitAnswer
-						onSubmit={handleSubmit}
-						isDisabled={isSaving || isSaved}
-						buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort Speichern'}
-					/>
-				</>
-			)}
+			<SubmitAnswer
+				onSubmit={handleSubmit}
+				isDisabled={isSaving || isSaved}
+				buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort Speichern'}
+			/>
 		</div>
 	);
 }

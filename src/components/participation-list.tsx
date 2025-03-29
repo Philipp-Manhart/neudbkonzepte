@@ -14,9 +14,10 @@ export interface PollParticipation {
 
 interface ParticipationListProps {
 	participations: PollParticipation[];
+	isOwner: boolean;
 }
 
-export function ParticipationList({ participations }: ParticipationListProps) {
+export function ParticipationList({ participations, isOwner }: ParticipationListProps) {
 	if (participations.length === 0) {
 		return (
 			<div className="text-center py-10">
@@ -31,7 +32,7 @@ export function ParticipationList({ participations }: ParticipationListProps) {
 	return (
 		<div className="space-y-4">
 			{participations.map((participation) => (
-				<ParticipationCard key={participation.pollRunId} participation={participation} />
+				<ParticipationCard key={participation.pollRunId} participation={participation} isOwner={isOwner}/>
 			))}
 		</div>
 	);

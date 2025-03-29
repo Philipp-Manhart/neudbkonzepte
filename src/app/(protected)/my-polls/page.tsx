@@ -4,6 +4,7 @@ import { getPollsByOwner } from '@/app/actions/poll';
 import { useUser } from '@/lib/context';
 import { useState, useEffect } from 'react';
 import { Poll } from '@/lib/definitions';
+import { getPollRunsByPollId } from '@/app/actions/poll_run';
 
 export default function Dashboard() {
 	const { userKey } = useUser();
@@ -12,9 +13,25 @@ export default function Dashboard() {
 	useEffect(() => {
 		async function getPolls() {
 			const pollData = await getPollsByOwner(userKey as string);
-			console.log(pollData);
-			setPolls(pollData as Poll[]);
-			//setPolls(mockPolls);
+
+			if (Array.isArray(pollData)) {
+				const pollsWithRunCounts = await Promise.all(
+					pollData.map(async (poll) => {
+						const response = await getPollRunsByPollId(poll.pollId);
+
+						let pollRunCount = 0;
+						if (response.success === true && response.pollRuns) {
+							pollRunCount = response.pollRuns.length;
+						}
+
+						return {
+							...poll,
+							pollRunCount,
+						};
+					})
+				);
+				setPolls(pollsWithRunCounts as Poll[]);
+			}
 		}
 		getPolls();
 	}, [userKey]);

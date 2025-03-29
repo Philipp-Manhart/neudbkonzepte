@@ -17,9 +17,10 @@ interface PollParticipation {
 
 interface ParticipationCardProps {
 	participation: PollParticipation;
+	isOwner: boolean;
 }
 
-export function ParticipationCard({ participation }: ParticipationCardProps) {
+export function ParticipationCard({ participation, isOwner }: ParticipationCardProps) {
 	const redirectViewLink = `/poll-participation/${participation.pollRunId}`;
 
 	return (
@@ -35,11 +36,6 @@ export function ParticipationCard({ participation }: ParticipationCardProps) {
 					<CalendarIcon className="h-4 w-4 text-muted-foreground" />
 					<label className="text-base font-medium text-muted-foreground">Beschreibung:</label>
 					<p className="text-lg">{participation.description}</p>
-				</div>
-				<div className="flex items-center gap-2">
-					<UsersIcon className="h-4 w-4 text-muted-foreground" />
-					<label className="text-base font-medium text-muted-foreground">Anzahl der Fragen:</label>
-					<p className="text-lg">{participation.questionCount}</p>
 				</div>
 
 				<div className="flex items-center gap-2">

@@ -9,9 +9,16 @@ interface YesNoQuestionProps {
 	questionText: string;
 	onAnswerSelected?: (value: string) => void;
 	pollRunId: string;
+	isOwner?: boolean;
 }
 
-export default function YesNoQuestion({ questionId, questionText, onAnswerSelected, pollRunId }: YesNoQuestionProps) {
+export default function YesNoQuestion({
+	questionId,
+	questionText,
+	onAnswerSelected,
+	pollRunId,
+	isOwner = false,
+}: YesNoQuestionProps) {
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -21,6 +28,16 @@ export default function YesNoQuestion({ questionId, questionText, onAnswerSelect
 		{ option: 'Yes', votes: 12 },
 		{ option: 'No', votes: 8 },
 	];
+
+	// Show chart immediately if user is the owner
+	if (isOwner || isSaved) {
+		return (
+			<div className="py-4 px-2 sm:px-0">
+				<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
+				<QuestionVotesChart title={questionText} chartData={mockChartData} />
+			</div>
+		);
+	}
 
 	const handleSubmit = async () => {
 		if (!selectedOption) return;
@@ -50,39 +67,31 @@ export default function YesNoQuestion({ questionId, questionText, onAnswerSelect
 		<div className="py-4 px-2 sm:px-0">
 			<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
 
-			{isSaved ? (
-				<QuestionVotesChart title={questionText} chartData={mockChartData} />
-			) : (
-				<>
-					<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center mt-4 max-w-md mx-auto">
-						<button
-							onClick={() => handleOptionClick('Yes')}
-							className={`px-8 py-4 rounded-lg border-2 transition-all ${
-								selectedOption === 'Yes'
-									? 'bg-green-500 text-white border-green-600'
-									: 'border-gray-300 hover:bg-gray-50'
-							} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
-							disabled={isSaved}>
-							Yes
-						</button>
+			<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center mt-4 max-w-md mx-auto">
+				<button
+					onClick={() => handleOptionClick('Yes')}
+					className={`px-8 py-4 rounded-lg border-2 transition-all ${
+						selectedOption === 'Yes' ? 'bg-green-500 text-white border-green-600' : 'border-gray-300 hover:bg-gray-50'
+					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
+					disabled={isSaved}>
+					Yes
+				</button>
 
-						<button
-							onClick={() => handleOptionClick('No')}
-							className={`px-8 py-4 rounded-lg border-2 transition-all ${
-								selectedOption === 'No' ? 'bg-red-500 text-white border-red-600' : 'border-gray-300 hover:bg-gray-50'
-							} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
-							disabled={isSaved}>
-							No
-						</button>
-					</div>
+				<button
+					onClick={() => handleOptionClick('No')}
+					className={`px-8 py-4 rounded-lg border-2 transition-all ${
+						selectedOption === 'No' ? 'bg-red-500 text-white border-red-600' : 'border-gray-300 hover:bg-gray-50'
+					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
+					disabled={isSaved}>
+					No
+				</button>
+			</div>
 
-					<SubmitAnswer
-						onSubmit={handleSubmit}
-						isDisabled={isSaving || !selectedOption || isSaved}
-						buttonText={isSaving ? 'Saving...' : isSaved ? 'Antwort Gespeichert' : 'Save Answer'}
-					/>
-				</>
-			)}
+			<SubmitAnswer
+				onSubmit={handleSubmit}
+				isDisabled={isSaving || !selectedOption || isSaved}
+				buttonText={isSaving ? 'Saving...' : isSaved ? 'Antwort Gespeichert' : 'Save Answer'}
+			/>
 		</div>
 	);
 }

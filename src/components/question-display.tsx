@@ -187,6 +187,7 @@ export default function QuestionDisplay({
 						questionId={currentQuestion.questionId}
 						questionText={currentQuestion.questionText}
 						pollRunId={pollRunId}
+						isOwner={isOwner}
 					/>
 				);
 			case 'single-choice':
@@ -196,6 +197,7 @@ export default function QuestionDisplay({
 						questionText={currentQuestion.questionText}
 						options={options}
 						pollRunId={pollRunId}
+						isOwner={isOwner}
 					/>
 				);
 			case 'multiple-choice':
@@ -205,6 +207,7 @@ export default function QuestionDisplay({
 						questionText={currentQuestion.questionText}
 						options={options}
 						pollRunId={pollRunId}
+						isOwner={isOwner}
 					/>
 				);
 			case 'yes-no':
@@ -213,6 +216,7 @@ export default function QuestionDisplay({
 						questionId={currentQuestion.questionId}
 						questionText={currentQuestion.questionText}
 						pollRunId={pollRunId}
+						isOwner={isOwner}
 					/>
 				);
 			default:
@@ -283,13 +287,6 @@ export default function QuestionDisplay({
 								Next Question
 							</button>
 						</div>
-					)}
-
-					{/* Debug button to manually advance questions during development */}
-					{process.env.NODE_ENV === 'development' && !isOwner && (
-						<button onClick={advanceToNextQuestion} className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">
-							Next Question (Debug)
-						</button>
 					)}
 
 					{/* Display SSE error if any */}

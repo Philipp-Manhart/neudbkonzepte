@@ -56,7 +56,7 @@ export function PollCard({ poll }: pollCardProps) {
 				<div className="flex items-center gap-2">
 					<UsersIcon className="h-4 w-4 text-muted-foreground" />
 					<label className="text-base font-medium text-muted-foreground">Anzahl Durchführungen:</label>
-					<p className="text-lg">{poll.questionCount}</p>
+					<p className="text-lg">{poll.pollRunCount}</p>
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">

@@ -33,6 +33,7 @@ export interface Poll{
 	description: string;
 	questionCount: number;
 	defaultduration: string;
+	pollRunCount: number;
 }
 
 export interface QuestionData {
