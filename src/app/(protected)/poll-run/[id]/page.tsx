@@ -20,7 +20,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
 	const responseQuestions = await getQuestionsByPollId(responsePoll.pollRun?.pollId as string);
 
-  const poll = await getPoll(responsePoll.pollRun?.pollId as string);
+	const poll = await getPoll(responsePoll.pollRun?.pollId as string);
 
 	const questionsCount = responseQuestions.questions?.length;
 
@@ -31,9 +31,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 	}
 
 	if (responsePoll.pollRun?.status === 'running') {
-
 		return (
-			<QuestionDisplay questions={responseQuestions.questions} pollRunId={id} defaultDuration={poll.defaultduration} />
+			<QuestionDisplay
+				questions={responseQuestions.questions}
+				pollRunId={id}
+				defaultDuration={poll.defaultduration}
+				isOwner={true}
+			/>
 		);
 	}
 }

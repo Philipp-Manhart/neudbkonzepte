@@ -520,3 +520,82 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 		return { success: false, error: 'Abrufen der Ergebnisse fehlgeschlagen' };
 	}
 }
+
+export async function getCurrentQuestionIndex(pollRunId: string) {
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const currentQuestionIndex = (await redis.hGet(pollRunKey, 'currentQuestionIndex')) || '0';
+		const questionsCount = await redis.zCard(`${pollRunKey}:questions`);
+
+		return {
+			success: true,
+			currentQuestionIndex: parseInt(currentQuestionIndex),
+			questionsCount,
+			isLastQuestion: parseInt(currentQuestionIndex) === questionsCount - 1,
+		};
+	} catch (error) {
+		console.error('Fehler beim Abrufen des aktuellen Frageindex:', error);
+		return {
+			success: false,
+			error: 'Abrufen des aktuellen Frageindex fehlgeschlagen',
+		};
+	}
+}
+
+export async function updateCurrentQuestion(
+	pollRunId: string,
+	action: 'next' | 'previous' | 'specific',
+	newIndex?: number
+) {
+	try {
+		const pollRunKey = await pollRunIdConverter(pollRunId);
+		const currentIndexStr = (await redis.hGet(pollRunKey, 'currentQuestionIndex')) || '0';
+		const currentIndex = parseInt(currentIndexStr);
+		const questionsCount = await redis.zCard(`${pollRunKey}:questions`);
+
+		let newQuestionIndex = currentIndex;
+
+		switch (action) {
+			case 'next':
+				newQuestionIndex = Math.min(currentIndex + 1, questionsCount - 1);
+				break;
+			case 'previous':
+				newQuestionIndex = Math.max(currentIndex - 1, 0);
+				break;
+			case 'specific':
+				if (newIndex !== undefined) {
+					newQuestionIndex = Math.max(0, Math.min(newIndex, questionsCount - 1));
+				}
+				break;
+		}
+
+		// Only update if there's an actual change
+		if (newQuestionIndex !== currentIndex) {
+			await redis.hSet(pollRunKey, 'currentQuestionIndex', String(newQuestionIndex));
+
+			// Publish an event with the new question index
+			await redis.publish(
+				`poll-run:${pollRunId}:updates`,
+				JSON.stringify({
+					event: 'question-update',
+					data: {
+						currentQuestionIndex: String(newQuestionIndex),
+						isLastQuestion: newQuestionIndex === questionsCount - 1,
+					},
+				})
+			);
+		}
+
+		return {
+			success: true,
+			currentQuestionIndex: newQuestionIndex,
+			isLastQuestion: newQuestionIndex === questionsCount - 1,
+		};
+	} catch (error) {
+		console.error('Fehler beim Aktualisieren der aktuellen Frage:', error);
+		return {
+			success: false,
+			error: 'Aktualisierung der aktuellen Frage fehlgeschlagen',
+		};
+	}
+}
