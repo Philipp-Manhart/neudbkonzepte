@@ -50,7 +50,7 @@ export default function MyParticipations() {
 
 				setLoading(true);
 				try {
-					const realParticipations = await getPollRunsByParticipant(newStr);
+					const realParticipations = await getPollRunsByParticipant(userKey);
 					console.log(realParticipations);
 					// Uncomment the line below to use real data instead of mock data
 					// setParticipations(realParticipations);
