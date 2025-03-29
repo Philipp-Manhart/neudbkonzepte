@@ -6,7 +6,6 @@ import PollViewContent from '@/components/app-view-poll-content';
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
-	console.log(id);
 
 	const questionData = await getQuestionsByPollId(id);
 	const pollData = await getPoll(id);

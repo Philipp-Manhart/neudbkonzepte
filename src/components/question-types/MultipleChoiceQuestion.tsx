@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
+import QuestionVotesChart from '@/components/app-question-votes-chart';
 
 interface MultipleChoiceQuestionProps {
 	questionId: string;
@@ -21,6 +22,12 @@ export default function MultipleChoiceQuestion({
 	const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
+
+	// Generate mock chart data based on the options
+	const mockChartData = options.map((option) => ({
+		option,
+		votes: Math.floor(Math.random() * 10) + 1, // Random votes between 1-10
+	}));
 
 	const handleSubmit = async () => {
 		if (selectedOptions.length === 0) return;
@@ -59,32 +66,38 @@ export default function MultipleChoiceQuestion({
 		<div className="py-4 px-2 sm:px-0">
 			<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
 
-			<ul className="space-y-2 max-w-md mx-auto sm:mx-0">
-				{options.map((option, index) => (
-					<li
-						key={index}
-						onClick={() => handleOptionClick(option)}
-						className={`border p-3 rounded-md transition-all ${
-							selectedOptions.includes(option) ? 'bg-amber-100 border-amber-500' : 'hover:bg-gray-50'
-						} ${isSaved ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
-						<div className="flex items-center">
-							<div
-								className={`w-4 h-4 rounded border mr-3 flex items-center justify-center ${
-									selectedOptions.includes(option) ? 'border-amber-500' : 'border-gray-400'
-								}`}>
-								{selectedOptions.includes(option) && <div className="w-2 h-2 bg-amber-500"></div>}
-							</div>
-							<span className="text-sm sm:text-base">{option}</span>
-						</div>
-					</li>
-				))}
-			</ul>
+			{isSaved ? (
+				<QuestionVotesChart title={questionText} chartData={mockChartData} />
+			) : (
+				<>
+					<ul className="space-y-2 max-w-md mx-auto sm:mx-0">
+						{options.map((option, index) => (
+							<li
+								key={index}
+								onClick={() => handleOptionClick(option)}
+								className={`border p-3 rounded-md transition-all ${
+									selectedOptions.includes(option) ? 'bg-amber-100 border-amber-500' : 'hover:bg-gray-50'
+								} ${isSaved ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
+								<div className="flex items-center">
+									<div
+										className={`w-4 h-4 rounded border mr-3 flex items-center justify-center ${
+											selectedOptions.includes(option) ? 'border-amber-500' : 'border-gray-400'
+										}`}>
+										{selectedOptions.includes(option) && <div className="w-2 h-2 bg-amber-500"></div>}
+									</div>
+									<span className="text-sm sm:text-base">{option}</span>
+								</div>
+							</li>
+						))}
+					</ul>
 
-			<SubmitAnswer
-				onSubmit={handleSubmit}
-				isDisabled={isSaving || selectedOptions.length === 0 || isSaved}
-				buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort Speichern'}
-			/>
+					<SubmitAnswer
+						onSubmit={handleSubmit}
+						isDisabled={isSaving || selectedOptions.length === 0 || isSaved}
+						buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort Speichern'}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

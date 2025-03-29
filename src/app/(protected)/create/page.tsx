@@ -92,7 +92,29 @@ export default function CreatePage() {
 		};
 	
 		const updateQuestionComponent = (questionId: string, updatedData: Partial<QuestionData>) => {
-			setQuestions(questions.map((q) => (q.questionId === questionId ? { ...q, ...updatedData } : q)));
+			setQuestions(
+				questions.map((q) => {
+					if (q.questionId === questionId) {
+						// If updating the question type, set appropriate options based on type
+						if (updatedData.type) {
+							let options = [...(q.options || [])];
+
+							if (updatedData.type === 'yes-no') {
+								options = ['Ja', 'Nein'];
+							} else if (updatedData.type === 'scale') {
+								options = ['1', '2', '3', '4', '5', '6', '7'];
+							} else if (!updatedData.options) {
+								// For other types, keep 4 empty options if not specified
+								options = Array(4).fill('');
+							}
+
+							return { ...q, ...updatedData, options };
+						}
+						return { ...q, ...updatedData };
+					}
+					return q;
+				})
+			);
 		};
 
 	async function handleSave() {
