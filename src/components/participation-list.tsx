@@ -37,7 +37,7 @@ export function ParticipationList({ participations, isOwner }: ParticipationList
 	return (
 		<div className="space-y-4">
 			{sortedParticipations.map((participation) => (
-				<ParticipationCard key={participation.pollRunId} participation={participation} isOwner={isOwner}/>
+				<ParticipationCard key={participation.pollRunId} participation={participation} isOwner={isOwner} />
 			))}
 		</div>
 	);
