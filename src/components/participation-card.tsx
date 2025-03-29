@@ -21,7 +21,7 @@ interface ParticipationCardProps {
 }
 
 export function ParticipationCard({ participation, isOwner }: ParticipationCardProps) {
-	const redirectViewLink = `/poll-participation/${participation.pollRunId}`;
+	const redirectViewLink = `/poll-result/${participation.pollRunId}`;
 
 	return (
 		<Card className="w-full max-w-3xl mb-4">

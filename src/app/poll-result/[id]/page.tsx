@@ -53,5 +53,5 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
 	console.log(pollRunData);
 
-	return <PollResultsDisplay pollRunId={id} pollData={pollRunData} />;
+	return <PollResultsDisplay pollData={pollRunData} />;
 }

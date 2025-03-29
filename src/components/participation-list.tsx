@@ -29,9 +29,14 @@ export function ParticipationList({ participations, isOwner }: ParticipationList
 		);
 	}
 
+	// Sort participations by date (newest first)
+	const sortedParticipations = [...participations].sort((a, b) => {
+		return new Date(b.participatedAt).getTime() - new Date(a.participatedAt).getTime();
+	});
+
 	return (
 		<div className="space-y-4">
-			{participations.map((participation) => (
+			{sortedParticipations.map((participation) => (
 				<ParticipationCard key={participation.pollRunId} participation={participation} isOwner={isOwner}/>
 			))}
 		</div>

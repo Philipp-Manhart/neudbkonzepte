@@ -19,11 +19,10 @@ interface PollData {
 }
 
 interface PollResultsDisplayProps {
-	pollRunId: string;
 	pollData: PollData;
 }
 
-export default function PollResultsDisplay({ pollRunId, pollData }: PollResultsDisplayProps) {
+export default function PollResultsDisplay({ pollData }: PollResultsDisplayProps) {
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
 	// Convert data for the current question to the format expected by the chart
@@ -46,16 +45,15 @@ export default function PollResultsDisplay({ pollRunId, pollData }: PollResultsD
 	};
 
 	const currentQuestion = pollData.questions[currentQuestionIndex];
+	console.log(currentQuestion);
 	const chartData = prepareChartData(currentQuestionIndex);
 
 	return (
 		<div className="container py-6">
-			<h1 className="text-3xl font-bold mb-6">Poll Results</h1>
-			<p className="mb-4 text-muted-foreground">Poll ID: {pollRunId}</p>
-
+			<h1 className="text-3xl font-bold mb-6">Ergebnisse der Umfrage</h1>
 			<div className="flex items-center justify-between mb-6">
 				<p className="text-lg">
-					Question {currentQuestionIndex + 1} of {pollData.questions.length}
+					Frage {currentQuestionIndex + 1} von {pollData.questions.length}
 				</p>
 				<div className="flex gap-4">
 					<Button variant="outline" size="icon" onClick={goToPrevious} aria-label="Previous question">

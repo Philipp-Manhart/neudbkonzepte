@@ -97,7 +97,7 @@ export function AppSidebar() {
 							<SidebarMenuItem key={myPollRuns.title}>
 								<SidebarMenuButton asChild {...(pathname === myPollRuns.url ? { isActive: true } : {})}>
 									<Link href={myPollRuns.url}>
-										<createPoll.icon />
+										<myPollRuns.icon />
 										<span>{myPollRuns.title}</span>{' '}
 									</Link>
 								</SidebarMenuButton>
