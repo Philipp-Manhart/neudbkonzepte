@@ -33,7 +33,16 @@ export async function signupAuthenticated(first_name: string, last_name: string,
 		await multi.exec();
 
 		await createSession(userKey, type);
-		redirect('/');
+
+		const cookieStore = await cookies();
+		const redirectUrl = cookieStore.get('redirectUrl')?.value;
+
+		if (redirectUrl) {
+			cookieStore.delete('redirectUrl');
+			redirect(redirectUrl);
+		} else {
+			redirect('/');
+		}
 	}
 }
 
@@ -47,7 +56,16 @@ export async function signupAnonymous() {
 	});
 
 	await createSession(userKey, type);
-	redirect('/');
+
+	const cookieStore = await cookies();
+	const redirectUrl = cookieStore.get('redirectUrl')?.value;
+
+	if (redirectUrl) {
+		cookieStore.delete('redirectUrl');
+		redirect(redirectUrl);
+	} else {
+		redirect('/');
+	}
 }
 
 // Login / Logout
@@ -69,11 +87,11 @@ export async function login(email: string, password: string) {
 	if (passwordMatch) {
 		await createSession(userKey, user.type);
 
-		const cookieStore = cookies();
-		const redirectUrl = (await cookieStore).get('redirectUrl')?.value;
+		const cookieStore = await cookies();
+		const redirectUrl = cookieStore.get('redirectUrl')?.value;
 
 		if (redirectUrl) {
-			(await cookieStore).delete('redirectUrl');
+			cookieStore.delete('redirectUrl');
 			redirect(redirectUrl);
 		} else {
 			redirect('/');
