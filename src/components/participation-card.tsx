@@ -26,7 +26,9 @@ interface ParticipationCardProps {
 
 export function ParticipationCard({ participation, isOwner }: ParticipationCardProps) {
 	const router = useRouter();
-	const redirectViewLink = `/poll-result/${participation.pollRunId}`;
+	const redirectViewLink = isOwner
+		? `/poll-result/${participation.pollRunId}`
+		: `/poll-result/participant/${participation.pollRunId}`;
 	const [isDeleting, setIsDeleting] = useState(false);
 
 	async function handleDeletePollRun() {
