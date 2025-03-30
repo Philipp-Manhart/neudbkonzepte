@@ -28,7 +28,7 @@ export default function EnterPollForm() {
 	async function onSubmit(values: z.infer<typeof EnterPollFormSchema>) {
 		setIsSubmitting(true);
 		setError(null);
-		const result = await enterPollRun(values.enterCode);
+		const result = await enterPollRun(values.enterCode );
 		if (result && !result.success) {
 			setError(result.error);
 			toast.error('Abstimmung beitreten fehlgeschlagen');

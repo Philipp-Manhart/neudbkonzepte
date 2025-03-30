@@ -22,9 +22,10 @@ interface PollParticipation {
 interface ParticipationCardProps {
 	participation: PollParticipation;
 	isOwner: boolean;
+	onDelete?: (pollRunId: string) => void;
 }
 
-export function ParticipationCard({ participation, isOwner }: ParticipationCardProps) {
+export function ParticipationCard({ participation, isOwner, onDelete }: ParticipationCardProps) {
 	const router = useRouter();
 	const redirectViewLink = `/poll-result/${participation.pollRunId}`;
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -36,6 +37,10 @@ export function ParticipationCard({ participation, isOwner }: ParticipationCardP
 
 		if (response.success) {
 			toast.success('Umfragendurchlauf erfolgreich gelöscht.');
+			// Call the onDelete callback to update the parent state
+			if (onDelete) {
+				onDelete(participation.pollRunId);
+			}
 			router.refresh();
 		} else {
 			console.error('Fehler beim Löschen des Durchlaufs.', response.error);
@@ -46,12 +51,14 @@ export function ParticipationCard({ participation, isOwner }: ParticipationCardP
 	return (
 		<Card className="h-full flex flex-col relative">
 			<CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
-				<h2 className="text-2xl font-bold pr-8">{participation.pollName}</h2>
-				{isOwner && (
-					<Button variant="outline" onClick={handleDeletePollRun} disabled={isDeleting}>
-						<Trash2 className="h-4 w-4" />
-					</Button>
-				)}
+				<div className="flex items-center">
+					<h2 className="text-2xl font-bold pr-8">{participation.pollName}</h2>
+					{isOwner && (
+						<Button variant="outline" onClick={handleDeletePollRun} disabled={isDeleting}>
+							<Trash2 className="h-4 w-4" />
+						</Button>
+					)}
+				</div>
 				<div className="text-sm text-muted-foreground">
 					{new Date(participation.participatedAt).toLocaleDateString()}
 				</div>
