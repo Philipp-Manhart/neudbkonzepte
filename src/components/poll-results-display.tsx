@@ -139,12 +139,12 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 		if (!question.userAnswers || question.userAnswers.length === 0) {
 			return 'Keine Antwort abgegeben';
 		}
-		
+
 		// Handle different question types
 		if (question.type === 'multiple-choice' || question.type === 'multiple') {
 			return question.userAnswers.join(', ');
 		}
-		
+
 		// For simple answers (single choice, yes-no, scale)
 		return question.userAnswers[0];
 	};
@@ -177,7 +177,7 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 			<div className="max-w-3xl mx-auto">
 				{currentQuestion && <QuestionVotesChart chartData={chartData} title={currentQuestion.questionText} />}
 			</div>
-			
+
 			{!isOwner && currentQuestion && currentQuestion.userAnswers && (
 				<div className="mt-8 max-w-3xl mx-auto bg-slate-50 dark:bg-slate-800 rounded-lg p-4 flex items-center">
 					<p className="font-medium text-slate-700 dark:text-slate-200">
