@@ -69,7 +69,8 @@ export default function MultipleChoiceQuestion({
 
 		try {
 			setIsSaving(true);
-			await saveUserAnswer(pollRunId, questionId, JSON.stringify(selectedOptions));
+			// Send the actual array instead of a JSON string
+			await saveUserAnswer(pollRunId, questionId, selectedOptions);
 			setIsSaved(true);
 		} catch (error) {
 			console.error('Error saving answer:', error);

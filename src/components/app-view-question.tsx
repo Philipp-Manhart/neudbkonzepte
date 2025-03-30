@@ -28,9 +28,6 @@ export default function ViewQuestion({ question }: ViewQuestionProps) {
 
 	return (
 		<Card className="w-full max-w-2xl">
-			<CardHeader>
-				<CardTitle>Frage {question.questionId}</CardTitle>
-			</CardHeader>
 			<CardContent className="space-y-4">
 				<div>
 					<h3 className="text-sm font-medium mb-1">Fragentyp</h3>

@@ -385,11 +385,30 @@ export async function saveUserAnswer(
 			return { success: false, error: 'Frage nicht vorhanden' };
 		}
 
-		const isMultipleChoice = questionData.type === 'multiple';
-		const answersArray = Array.isArray(answers) ? answers : [answers];
+		const isMultipleChoice = questionData.type === 'multiple-choice' || questionData.type === 'multiple';
+
+		// Handle answers appropriately based on their type
+		let answersArray: string[];
+		if (typeof answers === 'string') {
+			try {
+				// Try to parse the string as JSON if it looks like a JSON array
+				if (answers.startsWith('[') && answers.endsWith(']')) {
+					answersArray = JSON.parse(answers);
+				} else {
+					// Otherwise treat it as a single answer
+					answersArray = [answers];
+				}
+			} catch (e) {
+				// If parsing fails, treat as a single answer
+				answersArray = [answers];
+			}
+		} else {
+			// It's already an array
+			answersArray = answers;
+		}
 
 		// Validate that we're receiving the correct answer format for the question type
-		if (!isMultipleChoice && Array.isArray(answers) && answers.length > 1) {
+		if (!isMultipleChoice && answersArray.length > 1) {
 			return { success: false, error: 'Mehrfachauswahl ist für diese Frage nicht erlaubt' };
 		}
 
@@ -419,7 +438,7 @@ export async function saveUserAnswer(
 				}
 			}
 
-			// Save the new user answers
+			// Save the new user answers - always store as JSON
 			multi.set(userAnswerKey, JSON.stringify(answersArray));
 		}
 
@@ -453,7 +472,7 @@ export async function saveUserAnswer(
 			})
 		);
 
-		return { success: true, questionId, answers };
+		return { success: true, questionId, answers: answersArray };
 	} catch (error) {
 		console.error('Fehler beim Speichern der Antwort:', error);
 		return { success: false, error: 'Speichern der Antwort fehlgeschlagen' };
