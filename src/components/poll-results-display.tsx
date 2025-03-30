@@ -7,7 +7,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
 import { useUser } from '@/lib/context';
 
-// Mock data type definition based on getQuestionResults return type
 interface PollData {
 	success: boolean;
 	pollRunId: string;

@@ -21,6 +21,7 @@ export async function createPollRun(pollId: string) {
 					parseInt((await redis.hGet(pollKey, 'defaultduration')) || '0') * (await redis.zCard(`${pollKey}:questions`))
 			),
 			participantsCount: '0',
+			currentQuestionIndex: '0', // Initialize with the first question
 		});
 
 		// Add poll run to poll's list
@@ -38,25 +39,30 @@ export async function createPollRun(pollId: string) {
 				let possibleAnswers = '';
 
 				try {
-					if (questionData.options) {
-						if (typeof questionData.options === 'string') {
-							// Try to parse it to verify it's valid JSON, then use as is
-							JSON.parse(questionData.options);
-							possibleAnswers = questionData.options;
-						} else {
-							// Otherwise stringify it
-							possibleAnswers = JSON.stringify(questionData.options);
-						}
+					// Make sure we have the correct field - it might be options or possibleAnswers
+					if (questionData.possibleAnswers) {
+						possibleAnswers =
+							typeof questionData.possibleAnswers === 'string'
+								? questionData.possibleAnswers
+								: JSON.stringify(questionData.possibleAnswers);
+					} else if (questionData.options) {
+						possibleAnswers =
+							typeof questionData.options === 'string' ? questionData.options : JSON.stringify(questionData.options);
+					} else {
+						possibleAnswers = '[]';
 					}
-				} catch {
-					// If any error in parsing, stringify it
-					possibleAnswers = JSON.stringify(questionData.options || '[]');
+
+					// Validate JSON format
+					JSON.parse(possibleAnswers);
+				} catch (e) {
+					console.error('Error parsing possibleAnswers:', e);
+					possibleAnswers = '[]';
 				}
 
-				// Store question data for poll run
+				// Store question data for poll run - use correct field names
 				await redis.hSet(`${pollRunKey}:question:${questionId}`, {
 					type: questionData.type || 'single',
-					questionText: questionData.text || '',
+					questionText: questionData.questionText || questionData.text || '',
 					possibleAnswers: possibleAnswers,
 				});
 
