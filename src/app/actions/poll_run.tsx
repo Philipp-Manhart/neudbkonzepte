@@ -332,12 +332,17 @@ export async function enterPollRun(enterCode: string, userKey?: string) {
 
 		if (userKey) {
 			const multi = redis.multi();
+			// Add user to poll participants
 			multi.sAdd(`${pollRunKey}:participants`, userKey);
+
+			// Add pollRun to user's participations
 			multi.zAdd(`${userKey}:participations`, {
 				score: Date.now(),
 				value: pollRunKey as string,
 			});
+
 			await multi.exec();
+			console.log(`Added participation for user ${userKey}`);
 		}
 
 		return { success: true, pollRunId: enterCode };

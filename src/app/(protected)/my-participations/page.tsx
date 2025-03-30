@@ -1,61 +1,66 @@
 'use client';
-import { getPollRunsByParticipant } from '@/app/actions/poll_run';
-import { ParticipationList } from '@/components/participation-list';
-import { useUser } from '@/lib/context';
-import { useState, useEffect } from 'react';
 
-// Mock data for poll participations
-const mockParticipations = [
-	{
-		pollRunId: '1',
-		pollId: '101',
-		pollName: 'Mathematik Quiz',
-		description: 'Ein Quiz über grundlegende mathematische Konzepte',
-		participatedAt: '2023-05-15T14:30:00Z',
-		questionCount: 10,
-		participants: 80,
-	},
-	{
-		pollRunId: '2',
-		pollId: '102',
-		pollName: 'Deutschunterricht Feedback',
-		description: 'Feedbackumfrage zum Deutschunterricht',
-		participatedAt: '2023-06-22T09:15:00Z',
-		participants: 5,
-	},
-	{
-		pollRunId: '3',
-		pollId: '103',
-		pollName: 'Informatik Test',
-		description: 'Test über Programmierung und Algorithmen',
-		participatedAt: '2023-07-05T11:00:00Z',
-		questionCount: 15,
-		participants: 92,
-	},
-];
+import { ParticipationList } from '@/components/participation-list';
+import { getPollRunsByParticipant } from '@/app/actions/poll_run';
+import { getPoll } from '@/app/actions/poll';
+import { useState, useEffect } from 'react';
+import { useUser } from '@/lib/context';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MyParticipations() {
+	const [participations, setParticipations] = useState<any[]>([]);
+	const [loading, setLoading] = useState(true);
 	const { userKey } = useUser();
-	const [participations, setParticipations] = useState(mockParticipations);
-	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
 		async function fetchParticipations() {
 			if (userKey) {
-				const regex = /^user:/;
-				const newStr = userKey.replace(regex, '');
-
-				console.log(newStr);
-				console.log(userKey);
-
 				setLoading(true);
 				try {
-					const realParticipations = await getPollRunsByParticipant(userKey);
-					console.log(realParticipations);
-					// Uncomment the line below to use real data instead of mock data
-					// setParticipations(realParticipations);
+					const response = await getPollRunsByParticipant(userKey);
+
+					if (response.success && response.pollRuns) {
+						const enhancedPollRuns = await Promise.all(
+							response.pollRuns.map(async (pollRun) => {
+								try {
+									// Extract pollId from the response
+									const pollId = pollRun.pollKey.split(':')[1];
+
+									// Get poll details
+									const pollDetails = await getPoll(pollId);
+
+									// Format date
+									const formattedDate = new Date(parseInt(pollRun.created));
+
+									return {
+										pollRunId: pollRun.pollRunId,
+										pollId: pollId,
+										pollName: pollDetails?.name || 'Unnamed Poll',
+										description: pollDetails?.description || '',
+										participatedAt: formattedDate,
+										participants: pollRun.participantsCount || '0',
+										questionCount: pollRun.questionCount || '0',
+									};
+								} catch (error) {
+									console.error(`Failed to fetch details for poll ${pollRun.pollRunId}:`, error);
+									return {
+										pollRunId: pollRun.pollRunId,
+										pollId: pollRun.pollId,
+										pollName: 'Unnamed Poll',
+										description: '',
+										participatedAt: new Date(),
+										participants: pollRun.participantsCount || '0',
+									};
+								}
+							})
+						);
+						setParticipations(enhancedPollRuns);
+					} else {
+						setParticipations([]);
+					}
 				} catch (error) {
 					console.error('Failed to fetch participations:', error);
+					setParticipations([]);
 				} finally {
 					setLoading(false);
 				}
@@ -65,14 +70,23 @@ export default function MyParticipations() {
 		fetchParticipations();
 	}, [userKey]);
 
+	if (loading) {
+		return (
+			<div className="container mx-auto py-6">
+				<h1 className="text-3xl font-bold mb-6">Meine Teilnahmen</h1>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					{[...Array(4)].map((_, i) => (
+						<Skeleton key={i} className="h-48 w-full" />
+					))}
+				</div>
+			</div>
+		);
+	}
+
 	return (
-		<div className="container mx-auto py-8 px-4">
-			<h1 className="text-3xl font-bold mb-6 text-center">Meine Teilnahmen</h1>
-			{loading ? (
-				<p className="text-center">Lade Teilnahmen...</p>
-			) : (
-				<ParticipationList participations={participations} isOwner={false} />
-			)}
+		<div className="container mx-auto py-6">
+			<h1 className="text-3xl font-bold mb-6">Meine Teilnahmen</h1>
+			<ParticipationList participations={participations} isOwner={false} />
 		</div>
 	);
 }

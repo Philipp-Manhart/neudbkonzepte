@@ -14,7 +14,7 @@ interface PollParticipation {
 	pollId: string;
 	pollName: string;
 	description: string;
-	participatedAt: string;
+	participatedAt: string | Date;
 	questionCount: number;
 	participants: number;
 }
@@ -29,6 +29,16 @@ export function ParticipationCard({ participation, isOwner, onDelete }: Particip
 	const router = useRouter();
 	const redirectViewLink = `/poll-result/${participation.pollRunId}`;
 	const [isDeleting, setIsDeleting] = useState(false);
+
+	// Format date correctly regardless of input type
+	const formatDate = () => {
+		if (participation.participatedAt instanceof Date) {
+			return participation.participatedAt.toLocaleDateString();
+		} else if (typeof participation.participatedAt === 'string') {
+			return new Date(participation.participatedAt).toLocaleDateString();
+		}
+		return 'Unknown date';
+	};
 
 	async function handleDeletePollRun() {
 		setIsDeleting(true);
@@ -59,9 +69,7 @@ export function ParticipationCard({ participation, isOwner, onDelete }: Particip
 						</Button>
 					)}
 				</div>
-				<div className="text-sm text-muted-foreground">
-					{new Date(participation.participatedAt).toLocaleDateString()}
-				</div>
+				<div className="text-sm text-muted-foreground">{formatDate()}</div>
 			</CardHeader>
 			<CardContent className="space-y-4 flex-grow">
 				<div className="flex flex-col space-y-1">
