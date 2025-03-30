@@ -429,6 +429,30 @@ export async function saveUserAnswer(
 		}
 
 		await multi.exec();
+
+		// Get the updated results to publish
+		const updatedResults = await redis.hGetAll(resultsKey);
+
+		// Format the results - exclude initialization data and convert to numbers
+		const formattedResults: Record<string, number> = {};
+		Object.entries(updatedResults).forEach(([key, value]) => {
+			if (key !== 'initialized') {
+				formattedResults[key] = parseInt(value as string, 10) || 0;
+			}
+		});
+
+		// Publish an event with the updated results
+		await redis.publish(
+			`poll-run:${pollRunId}:updates`,
+			JSON.stringify({
+				event: 'results-update',
+				data: {
+					questionId,
+					results: formattedResults,
+				},
+			})
+		);
+
 		return { success: true, questionId, answers };
 	} catch (error) {
 		console.error('Fehler beim Speichern der Antwort:', error);

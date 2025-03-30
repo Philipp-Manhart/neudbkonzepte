@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Slider } from '@/components/ui/slider';
 import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
+import { useCurrentResultsSSE } from '@/hooks/use-current-results-sse';
 
 interface ScaleQuestionProps {
 	questionId: string;
@@ -24,25 +25,40 @@ export default function ScaleQuestion({
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
-	// Mock data for the chart - scale questions show distribution of ratings
-	//TODO Hier die echten Daten für das Live ergebnis
+	// Use the SSE hook to get real-time results
+	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
 
-	const mockChartData = [
-		{ option: '1', votes: 2 },
-		{ option: '2', votes: 3 },
-		{ option: '3', votes: 5 },
-		{ option: '4', votes: 8 },
-		{ option: '5', votes: 6 },
-		{ option: '6', votes: 4 },
-		{ option: '7', votes: 3 },
-	];
+	// Transform the results data for the chart
+	const [chartData, setChartData] = useState(
+		[1, 2, 3, 4, 5, 6, 7].map((value) => ({
+			option: value.toString(),
+			votes: 0,
+		}))
+	);
+
+	// Update chart data when results change
+	useEffect(() => {
+		if (results) {
+			setChartData(
+				[1, 2, 3, 4, 5, 6, 7].map((value) => ({
+					option: value.toString(),
+					votes: results[value.toString()] || 0,
+				}))
+			);
+		}
+	}, [results]);
 
 	// Show chart immediately if user is the owner
 	if (isOwner || isSaved) {
 		return (
 			<div className="py-4 px-2 sm:px-0">
 				<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
-				<QuestionVotesChart title={questionText} chartData={mockChartData} />
+				{isLoading ? (
+					<div className="text-center py-4">Loading results...</div>
+				) : (
+					<QuestionVotesChart title={questionText} chartData={chartData} />
+				)}
+				{error && <div className="text-red-500 text-center mt-2">Error loading results: {error}</div>}
 			</div>
 		);
 	}

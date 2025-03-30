@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
+import { useCurrentResultsSSE } from '@/hooks/use-current-results-sse';
 
 interface MultipleChoiceQuestionProps {
 	questionId: string;
@@ -25,19 +26,40 @@ export default function MultipleChoiceQuestion({
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
-	// Generate mock chart data based on the options
-	//TODO Hier die echten Daten für das Live ergebnis
-	const mockChartData = options.map((option) => ({
-		option,
-		votes: Math.floor(Math.random() * 10) + 1, // Random votes between 1-10
-	}));
+	// Use the SSE hook to get real-time results
+	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
+
+	// Transform the results data for the chart
+	const [chartData, setChartData] = useState(
+		options.map((option) => ({
+			option,
+			votes: 0,
+		}))
+	);
+
+	// Update chart data when results change
+	useEffect(() => {
+		if (results) {
+			setChartData(
+				options.map((option) => ({
+					option,
+					votes: results[option] || 0,
+				}))
+			);
+		}
+	}, [results, options]);
 
 	// Show chart immediately if user is the owner
 	if (isOwner || isSaved) {
 		return (
 			<div className="py-4 px-2 sm:px-0">
 				<h3 className="text-xl font-semibold mb-4 text-center sm:text-left">{questionText}</h3>
-				<QuestionVotesChart title={questionText} chartData={mockChartData} />
+				{isLoading ? (
+					<div className="text-center py-4">Loading results...</div>
+				) : (
+					<QuestionVotesChart title={questionText} chartData={chartData} />
+				)}
+				{error && <div className="text-red-500 text-center mt-2">Error loading results: {error}</div>}
 			</div>
 		);
 	}

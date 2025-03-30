@@ -108,6 +108,10 @@ export async function GET(request: Request, { params }: { params: { pollRunId: s
 								controller.enqueue(
 									encoder.encode(`event: question-update\ndata: ${JSON.stringify(messageData.data)}\n\n`)
 								);
+							} else if (messageData.event === 'results-update') {
+								controller.enqueue(
+									encoder.encode(`event: results-update\ndata: ${JSON.stringify(messageData.data)}\n\n`)
+								);
 							} else {
 								controller.enqueue(encoder.encode(`data: ${message}\n\n`));
 							}
