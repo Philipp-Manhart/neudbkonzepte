@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { createPollRun } from '@/app/actions/poll_run';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { deletePoll } from '@/app/actions/poll';
+import { toast } from 'sonner';
 
 interface pollCardProps {
 	poll: Poll;
@@ -16,6 +18,7 @@ interface pollCardProps {
 export function PollCard({ poll }: pollCardProps) {
 	const router = useRouter();
 	const [isStarting, setIsStarting] = useState(false);
+	const [isDeleting, setIsDeleting] = useState(false);
 	const redirectEditLink = `/my-polls/${poll.pollId}/edit`;
 	const redirectViewLink = `/my-polls/${poll.pollId}`;
 
@@ -34,11 +37,27 @@ export function PollCard({ poll }: pollCardProps) {
 		}
 	}
 
+	async function handleDeletePoll() {
+		setIsDeleting(true);
+		const response = await deletePoll(poll.pollId as string);
+		setIsDeleting(false);
+
+		if (response.success) {
+			toast.success('Umfrage erfolgreich gelöscht.');
+			router.refresh();
+		} else {
+			console.error('Failed to delete poll:', response.error);
+			toast.error('Fehler beim Löschen der Umfrage.');
+		}
+	}
+
+
+
 	return (
 		<Card className="h-full flex flex-col">
 			<CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
 				<h2 className="text-2xl font-bold">{poll.name}</h2>
-				<Button variant="outline">
+				<Button variant="outline" onClick={handleDeletePoll} disabled={isDeleting}>
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</CardHeader>
@@ -68,7 +87,7 @@ export function PollCard({ poll }: pollCardProps) {
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">
-				<Button className="w-full flex-1 flex items-center gap-2" onClick={handleStartPoll} disabled={isStarting}>
+				<Button className="w-full flex-1 flex items-center gap-2" onClick={handleStartPoll} disabled={isStarting || isDeleting}>
 					<PlayIcon className="h-4 w-4" />
 					{isStarting ? 'Wird gestartet...' : 'Durchführen'}
 				</Button>

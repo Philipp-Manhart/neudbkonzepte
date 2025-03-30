@@ -28,6 +28,7 @@ export default function OwnerWaitingRoom({ questionsCount, participants, pollRun
 	return (
 		<div className="flex flex-col items-center p-6 max-w-3xl mx-auto">
 			<h1 className="text-2xl font-bold mb-6">Beginne die Umfrage sobald du willst.</h1>
+			<h2 className='text-xl mb-6'>Die Teilnehmer können mit diesem Code beitreten: {pollRunId}</h2>
 
 			<ParticipantListWaitingRoom pollRunId={pollRunId} questionsCount={questionsCount} participants={participants} />
 			<div className="pt-5">

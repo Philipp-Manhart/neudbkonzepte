@@ -6,6 +6,9 @@ import MultipleChoiceQuestion from './question-types/MultipleChoiceQuestion';
 import YesNoQuestion from './question-types/YesNoQuestion';
 import { useCurrentQuestionSSE } from '@/hooks/use-current-question-sse';
 import { updateCurrentQuestion } from '@/app/actions/poll_run';
+import { Button } from './ui/button';
+import { endPollRun } from '@/app/actions/poll_run';
+import { toast } from 'sonner';
 
 interface Question {
 	id: string;
@@ -32,6 +35,7 @@ export default function QuestionDisplay({
 	const [timeLeft, setTimeLeft] = useState<number>(parseInt(defaultDuration as any) || 30);
 	const [pollCompleted, setPollCompleted] = useState(false);
 	const [isAdvancing, setIsAdvancing] = useState(false);
+	const [isEnding, setIsEnding] = useState(false);
 
 	const updateInProgress = useRef(false);
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -107,21 +111,21 @@ export default function QuestionDisplay({
 		}, 50);
 	};
 
-	// Go to previous question (only available for poll owner)
-	const goToPreviousQuestion = async () => {
+	// End the Poll Run
+	const handleEndPollRun = async () => {
 		if (updateInProgress.current || isAdvancing || !isOwner || currentQuestionIndex <= 0) return;
 
-		setIsAdvancing(true);
+		setIsEnding(true);
 		updateInProgress.current = true;
 
-		const result = await updateCurrentQuestion(pollRunId, 'previous');
+		const result = await endPollRun(pollRunId);
 		if (!result.success) {
-			console.error('Failed to go to previous question:', result.error);
+			toast.error("Durchlauf konnte nicht beendet werden.")
 		}
 
 		setTimeout(() => {
 			updateInProgress.current = false;
-			setIsAdvancing(false);
+			setIsEnding(false);
 		}, 50);
 	};
 
@@ -265,27 +269,17 @@ export default function QuestionDisplay({
 					{/* Navigation controls for poll owner */}
 					{isOwner && (
 						<div className="flex justify-between mt-6">
-							<button
-								onClick={goToPreviousQuestion}
-								disabled={currentQuestionIndex <= 0 || isAdvancing}
-								className={`px-4 py-2 rounded ${
-									currentQuestionIndex <= 0 || isAdvancing
-										? 'bg-gray-300 text-gray-500'
-										: 'bg-blue-500 text-white hover:bg-blue-600'
-								}`}>
-								Previous Question
-							</button>
+							<Button
+								onClick={handleEndPollRun}
+								disabled={isEnding || isAdvancing}>
+								Umfragedurchlauf beenden
+							</Button>
 
-							<button
+							<Button
 								onClick={advanceToNextQuestion}
-								disabled={currentQuestionIndex >= questions.length - 1 || isAdvancing}
-								className={`px-4 py-2 rounded ${
-									currentQuestionIndex >= questions.length - 1 || isAdvancing
-										? 'bg-gray-300 text-gray-500'
-										: 'bg-blue-500 text-white hover:bg-blue-600'
-								}`}>
-								Next Question
-							</button>
+								disabled={currentQuestionIndex >= questions.length - 1 || isAdvancing}>
+								Nächste Frage
+							</Button>
 						</div>
 					)}
 

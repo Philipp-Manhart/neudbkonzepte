@@ -22,14 +22,11 @@ interface EditProfileFormProps {
 export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
-	const [showPasswordFields, setShowPasswordFields] = useState(false);
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const [formData, setFormData] = useState({
 		first_name: initialData?.first_name || '',
 		last_name: initialData?.last_name || '',
 		email: initialData?.email || '',
-		password: '',
-		confirmPassword: '',
 	});
 
 	return (
@@ -41,15 +38,6 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 				<form
 					action={(formData) => {
 						startTransition(async () => {
-							if (showPasswordFields) {
-								const password = formData.get('password') as string;
-								const confirmPassword = formData.get('confirmPassword') as string;
-
-								if (password !== confirmPassword) {
-									setErrors({ password: 'Passwörter stimmen nicht überein' });
-									return;
-								}
-							}
 
 							try {
 								const result = await action(formData);
@@ -112,39 +100,6 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 						/>
 						{errors.email && <p className="text-sm text-destructive mt-2">{errors.email}</p>}
 					</div>
-					<div className="space-y-3">
-						<Button type="button" variant="outline" onClick={() => setShowPasswordFields(!showPasswordFields)}>
-							{showPasswordFields ? 'Passwort verdecken' : 'Passwort ändern'}
-						</Button>
-					</div>
-
-					{showPasswordFields && (
-						<>
-							<div className="space-y-3">
-								<Label htmlFor="password">Neues Passwort</Label>
-								<Input
-									id="password"
-									type="password"
-									value={formData.password}
-									onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-									disabled={isPending}
-									name="password"
-								/>
-								{errors.password && <p className="text-sm text-destructive mt-2">{errors.password}</p>}
-							</div>
-							<div className="space-y-3">
-								<Label htmlFor="confirmPassword">Passwort bestätigen</Label>
-								<Input
-									id="confirmPassword"
-									type="password"
-									value={formData.confirmPassword}
-									onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-									disabled={isPending}
-									name="confirmPassword"
-								/>
-							</div>
-						</>
-					)}
 					<Button type="submit" className="w-full" disabled={isPending}>
 						{isPending ? 'Speichert...' : 'Änderung speichern'}
 					</Button>

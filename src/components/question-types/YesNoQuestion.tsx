@@ -71,7 +71,9 @@ export default function YesNoQuestion({
 				<button
 					onClick={() => handleOptionClick('Yes')}
 					className={`px-8 py-4 rounded-lg border-2 transition-all ${
-						selectedOption === 'Yes' ? 'bg-green-500 text-white border-green-600' : 'border-gray-300 hover:bg-gray-50'
+						selectedOption === 'Yes'
+							? 'bg-green-500 text-white border-green-600 dark:bg-green-600 dark:border-green-500'
+							: 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800'
 					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
 					disabled={isSaved}>
 					Yes
@@ -80,7 +82,9 @@ export default function YesNoQuestion({
 				<button
 					onClick={() => handleOptionClick('No')}
 					className={`px-8 py-4 rounded-lg border-2 transition-all ${
-						selectedOption === 'No' ? 'bg-red-500 text-white border-red-600' : 'border-gray-300 hover:bg-gray-50'
+						selectedOption === 'No'
+							? 'bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-500'
+							: 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800'
 					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
 					disabled={isSaved}>
 					No

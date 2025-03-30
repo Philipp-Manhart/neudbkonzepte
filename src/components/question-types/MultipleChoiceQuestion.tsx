@@ -84,14 +84,18 @@ export default function MultipleChoiceQuestion({
 						key={index}
 						onClick={() => handleOptionClick(option)}
 						className={`border p-3 rounded-md transition-all ${
-							selectedOptions.includes(option) ? 'bg-amber-100 border-amber-500' : 'hover:bg-gray-50'
+							selectedOptions.includes(option)
+								? 'bg-amber-100 border-amber-500 dark:bg-amber-900/30 dark:border-amber-400'
+								: 'hover:bg-gray-50 dark:hover:bg-gray-800'
 						} ${isSaved ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'}`}>
 						<div className="flex items-center">
 							<div
 								className={`w-4 h-4 rounded border mr-3 flex items-center justify-center ${
-									selectedOptions.includes(option) ? 'border-amber-500' : 'border-gray-400'
+									selectedOptions.includes(option)
+										? 'border-amber-500 dark:border-amber-400'
+										: 'border-gray-400 dark:border-gray-600'
 								}`}>
-								{selectedOptions.includes(option) && <div className="w-2 h-2 bg-amber-500"></div>}
+								{selectedOptions.includes(option) && <div className="w-2 h-2 bg-amber-500 dark:bg-amber-400"></div>}
 							</div>
 							<span className="text-sm sm:text-base">{option}</span>
 						</div>
