@@ -8,12 +8,11 @@ const protectedRoutes = [
 	'/create',
 	'/my-polls',
 	'/my-participations',
+	'/my-poll-runs',
+	'/poll-run',
 	'/polls/[id]',
 	'/participate/[id]',
 	'/participate',
-	
-
-
 ];
 const publicRoutes = ['/login'];
 
