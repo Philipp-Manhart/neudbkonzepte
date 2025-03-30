@@ -28,8 +28,42 @@ export default function PollResultsDisplay({ pollData }: PollResultsDisplayProps
 	// Convert data for the current question to the format expected by the chart
 	const prepareChartData = (questionIndex: number) => {
 		const question = pollData.questions[questionIndex];
+		console.log(question);
 		if (!question) return [];
 
+		// Handle multiple-choice questions differently
+		if (question.type === 'multiple-choice') {
+			// Create a map to store the votes for each option
+			const optionVotes: Record<string, number> = {};
+
+			// Process the results
+			Object.entries(question.results).forEach(([optionStr, votes]) => {
+				try {
+					// Try to parse the key as JSON array
+					const options = JSON.parse(optionStr);
+					if (Array.isArray(options)) {
+						// For each selected option in this vote, add the votes
+						options.forEach((option) => {
+							optionVotes[option] = (optionVotes[option] || 0) + votes;
+						});
+					} else {
+						// If not an array, treat as a single option
+						optionVotes[optionStr] = (optionVotes[optionStr] || 0) + votes;
+					}
+				} catch (e) {
+					// If parsing fails, treat as a single option
+					optionVotes[optionStr] = (optionVotes[optionStr] || 0) + votes;
+				}
+			});
+
+			// Convert to the format expected by the chart
+			return Object.entries(optionVotes).map(([option, votes]) => ({
+				option,
+				votes,
+			}));
+		}
+
+		// For non-multiple-choice questions, use the existing logic
 		return Object.entries(question.results).map(([option, votes]) => ({
 			option,
 			votes,
