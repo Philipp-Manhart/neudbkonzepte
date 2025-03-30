@@ -47,7 +47,7 @@ const profile = {
 };
 
 const myPollRuns ={
-	title: 'Meine Durchführungen',
+	title: 'Meine Durchläufe',
 	url: '/my-poll-runs',
 	icon: LucidePaperclip,
 }

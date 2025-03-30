@@ -17,38 +17,40 @@ export default function MyParticipations() {
 				setLoading(true);
 				try {
 					const realParticipations = await getPollRunsByOwner(userKey);
-					console.log(realParticipations);
 
 					// Fetch additional details for each poll run
-					const enhancedPollRuns = await Promise.all(
-						realParticipations.pollRuns.map(async (pollRun) => {
-							try {
-								// Extract pollId from the response
-								const pollId = pollRun.pollKey.split(':')[1];
+					if (realParticipations.pollRuns) {
+						const enhancedPollRuns = await Promise.all(
+							realParticipations.pollRuns.map(async (pollRun) => {
+								try {
+									// Extract pollId from the response
+									const pollId = pollRun.pollKey.split(':')[1];
 
-								// Get poll details
-								const pollDetails = await getPoll(pollId);
+									// Get poll details
+									const pollDetails = await getPoll(pollId);
 
-								// Format date only if participatedAt doesn't already exist
-								const formattedDate = new Date(parseInt(pollRun.created));
+									// Format date only if participatedAt doesn't already exist
+									const formattedDate = new Date(parseInt(pollRun.created));
 
-								// Only add properties that don't already exist
-								return {
-									...pollRun,
-									pollId: pollId,
-									pollName: pollDetails?.name || pollRun.pollName || 'Unnamed Poll',
-									description: pollDetails?.description || pollRun.description || '',
-									participatedAt: formattedDate,
-								};
-							} catch (error) {
-								console.error(`Failed to fetch details for poll ${pollRun.pollRunId}:`, error);
-								return pollRun; // Return the original poll run data if there's an error
-							}
-						})
-					);
-					console.log(enhancedPollRuns);
-
-					setParticipations(enhancedPollRuns);
+									// Only add properties that don't already exist
+									return {
+										...pollRun,
+										pollId: pollId,
+										pollName: pollDetails?.name || pollRun.pollName || 'Unnamed Poll',
+										description: pollDetails?.description || pollRun.description || '',
+										participatedAt: formattedDate,
+									};
+								} catch (error) {
+									console.error(`Failed to fetch details for poll ${pollRun.pollRunId}:`, error);
+									return pollRun; // Return the original poll run data if there's an error
+								}
+							})
+						);
+						setParticipations(enhancedPollRuns);
+					}
+					else{
+						setParticipations([])
+					}
 				} catch (error) {
 					console.error('Failed to fetch participations:', error);
 				} finally {

@@ -13,14 +13,7 @@ interface PollRunContentProps {
 	isOwner: boolean;
 }
 
-const mockParticipants = [
-	{ id: 1, name: 'Max Mustermann' },
-	{ id: 2, name: 'Anna Schmidt' },
-	{ id: 3, name: 'Erika Müller' },
-	{ id: 4, name: null }, // Anonymous participant
-	{ id: 5, name: 'Thomas Weber' },
-	{ id: 6, name: null }, // Anonymous participant
-];
+const mockParticipants = [];
 
 export default function PollRunContent({ params, isOwner }: PollRunContentProps) {
 	const [pollRun, setPollRun] = useState<any>(null);
@@ -105,7 +98,6 @@ export default function PollRunContent({ params, isOwner }: PollRunContentProps)
 			return (
 				<ParticipantWaitingRoom questionsCount={questionsCount} participants={mockParticipants} pollRunId={params} />
 			);
-;
 		}
 	}
 

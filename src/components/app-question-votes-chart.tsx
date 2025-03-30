@@ -7,10 +7,10 @@ import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '
 
 
 const chartConfig = {
-  votes: {
-    label: 'Stimmen',
-    color: 'hsl(var(--chart-1))',
-  },
+	votes: {
+		label: 'Stimmen',
+		color:'#154c79',
+	},
 } satisfies ChartConfig;
 
 interface QuestionVotesChartProps {
@@ -42,10 +42,10 @@ export default function QuestionVotesChart({chartData, title}: QuestionVotesChar
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
+              tickFormatter={(value) => value.slice(0, 15)}
             />
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="votes" fill="var(--color-desktop)" radius={8}>
+            <Bar dataKey="votes" fill="var(--color-votes)" radius={8}>
               <LabelList position="top" offset={12} className="fill-foreground" fontSize={12} />
             </Bar>
           </BarChart>

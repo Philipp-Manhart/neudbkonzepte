@@ -1,9 +1,13 @@
 'use client';
 
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { CalendarIcon, UsersIcon, View } from 'lucide-react';
+import { CalendarIcon, UsersIcon, View, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import Link from 'next/link';
+import { deletePollRun } from '@/app/actions/poll_run';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface PollParticipation {
 	pollRunId: string;
@@ -21,12 +25,33 @@ interface ParticipationCardProps {
 }
 
 export function ParticipationCard({ participation, isOwner }: ParticipationCardProps) {
+	const router = useRouter();
 	const redirectViewLink = `/poll-result/${participation.pollRunId}`;
+	const [isDeleting, setIsDeleting] = useState(false);
+
+	async function handleDeletePollRun() {
+		setIsDeleting(true);
+		const response = await deletePollRun(participation.pollRunId as string);
+		setIsDeleting(false);
+
+		if (response.success) {
+			toast.success('Umfragendurchlauf erfolgreich gelöscht.');
+			router.refresh();
+		} else {
+			console.error('Fehler beim Löschen des Durchlaufs.', response.error);
+			toast.error('Fehler beim Löschen des Durchlaufs.');
+		}
+	}
 
 	return (
-		<Card className="h-full flex flex-col">
+		<Card className="h-full flex flex-col relative">
 			<CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
-				<h2 className="text-2xl font-bold">{participation.pollName}</h2>
+				<h2 className="text-2xl font-bold pr-8">{participation.pollName}</h2>
+				{isOwner && (
+					<Button variant="outline" onClick={handleDeletePollRun} disabled={isDeleting}>
+						<Trash2 className="h-4 w-4" />
+					</Button>
+				)}
 				<div className="text-sm text-muted-foreground">
 					{new Date(participation.participatedAt).toLocaleDateString()}
 				</div>

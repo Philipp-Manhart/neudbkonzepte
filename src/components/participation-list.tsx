@@ -19,11 +19,18 @@ interface ParticipationListProps {
 
 export function ParticipationList({ participations, isOwner }: ParticipationListProps) {
 	if (participations.length === 0) {
-		return (
+		return isOwner ? (
 			<div className="text-center py-10">
-				<h2 className="text-xl font-semibold">Du hast noch an keinen Umfragen teilgenommen.</h2>
+				<h2 className="text-xl font-semibold">Du hast noch keine Umfragen durchgeführt.</h2>
 				<p className="text-muted-foreground mt-2">
-					Deine Teilnahmen werden hier angezeigt, sobald du an Umfragen teilnimmst.
+					Deine Durchführungen werden hier angezeigt, sobald du eine Umfrage startest.
+				</p>
+			</div>
+		) : (
+			<div className="text-center py-10">
+				<h2 className="text-xl font-semibold">Du hast an keinen Umfragen teilgenommen.</h2>
+				<p className="text-muted-foreground mt-2">
+					Deine Teilnahmen werden hier angezeigt, sobald du an einer Umfrage teilnimmst.
 				</p>
 			</div>
 		);

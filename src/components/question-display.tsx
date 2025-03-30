@@ -113,7 +113,7 @@ export default function QuestionDisplay({
 
 	// End the Poll Run
 	const handleEndPollRun = async () => {
-		if (updateInProgress.current || isAdvancing || !isOwner || currentQuestionIndex <= 0) return;
+		if (updateInProgress.current || isAdvancing || !isOwner) return;
 
 		setIsEnding(true);
 		updateInProgress.current = true;

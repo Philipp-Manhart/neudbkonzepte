@@ -25,8 +25,8 @@ export default function YesNoQuestion({
 
 	// Mock data for Yes/No chart
 	const mockChartData = [
-		{ option: 'Yes', votes: 12 },
-		{ option: 'No', votes: 8 },
+		{ option: 'Ja', votes: 12 },
+		{ option: 'Nein', votes: 8 },
 	];
 
 	// Show chart immediately if user is the owner
