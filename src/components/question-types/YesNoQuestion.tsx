@@ -24,6 +24,7 @@ export default function YesNoQuestion({
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
 	// Mock data for Yes/No chart
+	//TODO Hier die echten Daten für das Live ergebnis
 	const mockChartData = [
 		{ option: 'Ja', votes: 12 },
 		{ option: 'Nein', votes: 8 },
@@ -76,7 +77,7 @@ export default function YesNoQuestion({
 							: 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800'
 					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
 					disabled={isSaved}>
-					Yes
+					Ja
 				</button>
 
 				<button
@@ -87,7 +88,7 @@ export default function YesNoQuestion({
 							: 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800'
 					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
 					disabled={isSaved}>
-					No
+					Nein
 				</button>
 			</div>
 

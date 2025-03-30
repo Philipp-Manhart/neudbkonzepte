@@ -25,6 +25,8 @@ export default function ScaleQuestion({
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
 	// Mock data for the chart - scale questions show distribution of ratings
+	//TODO Hier die echten Daten für das Live ergebnis
+
 	const mockChartData = [
 		{ option: '1', votes: 2 },
 		{ option: '2', votes: 3 },

@@ -57,7 +57,6 @@ export default function EditProfilePage() {
 			const new_last_name = formData.get('last_name')?.toString() as string;
 
 			//Hier Profil Updaten
-			//TODO geht noch nicht (es kommt vom Backend Update fehlgeschlagen)
 			const response = await updateUser(userKey, new_first_name, new_last_name, new_email);
 
 			console.log(response);

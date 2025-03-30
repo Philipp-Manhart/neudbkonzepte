@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { getQuestionResults } from '@/app/actions/poll_run';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
+import { useUser } from '@/lib/context';
 
 // Mock data type definition based on getQuestionResults return type
 interface PollData {
@@ -19,16 +21,42 @@ interface PollData {
 }
 
 interface PollResultsDisplayProps {
-	pollData: PollData;
+	pollRunId: string;
+	isOwner: boolean;
 }
 
-export default function PollResultsDisplay({ pollData }: PollResultsDisplayProps) {
+export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDisplayProps) {
+	const { userKey } = useUser();
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+	const [pollData, setPollData] = useState<PollData | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
+
+	useEffect(() => {
+		async function fetchPollData() {
+			try {
+				setIsLoading(true);
+				if (!isOwner) {
+					//TODO Hier die Daten gescheit zurückgeben
+					const data = await getQuestionResults(pollRunId, userKey);
+					setPollData(data);
+				} else {
+					const data = await getQuestionResults(pollRunId);
+					setPollData(data);
+				}
+			} catch (error) {
+				console.error('Failed to fetch poll results:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
+		fetchPollData();
+	}, [pollRunId]);
 
 	// Convert data for the current question to the format expected by the chart
 	const prepareChartData = (questionIndex: number) => {
+		if (!pollData) return [];
 		const question = pollData.questions[questionIndex];
-		console.log(question);
 		if (!question) return [];
 
 		// Handle multiple-choice questions differently
@@ -71,15 +99,21 @@ export default function PollResultsDisplay({ pollData }: PollResultsDisplayProps
 	};
 
 	const goToPrevious = () => {
+		if (!pollData) return;
 		setCurrentQuestionIndex((prev) => (prev > 0 ? prev - 1 : pollData.questions.length - 1));
 	};
 
 	const goToNext = () => {
+		if (!pollData) return;
 		setCurrentQuestionIndex((prev) => (prev < pollData.questions.length - 1 ? prev + 1 : 0));
 	};
 
+	// Early return while loading or if no data
+	if (isLoading || !pollData) {
+		return <div className="container py-6">Loading poll results...</div>;
+	}
+
 	const currentQuestion = pollData.questions[currentQuestionIndex];
-	console.log(currentQuestion);
 	const chartData = prepareChartData(currentQuestionIndex);
 
 	return (
@@ -102,6 +136,14 @@ export default function PollResultsDisplay({ pollData }: PollResultsDisplayProps
 			<div className="max-w-3xl mx-auto">
 				{currentQuestion && <QuestionVotesChart chartData={chartData} title={currentQuestion.questionText} />}
 			</div>
+			{!isOwner && (
+				<div className="mt-8 max-w-3xl mx-auto  rounded-lg p-4 flex items-center">
+					<p className="font-medium text-slate-700">
+{/* 						TODO: Hier brauch ich die Antwort vom Participant aus den Daten
+ */}						Deine Antwort war: <span className=" font-semibold">Data</span>
+					</p>
+				</div>
+			)}
 		</div>
 	);
 }
