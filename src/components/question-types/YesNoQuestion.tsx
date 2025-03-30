@@ -4,6 +4,7 @@ import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
 import { useCurrentResultsSSE } from '@/hooks/use-current-results-sse';
+import { useUser } from '@/lib/context';
 
 interface YesNoQuestionProps {
 	questionId: string;
@@ -20,6 +21,7 @@ export default function YesNoQuestion({
 	pollRunId,
 	isOwner = false,
 }: YesNoQuestionProps) {
+	const { userKey } = useUser();
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -27,7 +29,7 @@ export default function YesNoQuestion({
 	// Use the SSE hook to get real-time results
 	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
 
-	// Transform the results data for the chart
+	// Transform the results data for the chart with consistent German labels
 	const [chartData, setChartData] = useState([
 		{ option: 'Ja', votes: 0 },
 		{ option: 'Nein', votes: 0 },
@@ -36,9 +38,13 @@ export default function YesNoQuestion({
 	// Update chart data when results change
 	useEffect(() => {
 		if (results) {
+			// Map all possible variants to German labels
+			const yesVotes = (results['Yes'] || 0) + (results['Ja'] || 0);
+			const noVotes = (results['No'] || 0) + (results['Nein'] || 0);
+
 			setChartData([
-				{ option: 'Ja', votes: results['Yes'] || 0 },
-				{ option: 'Nein', votes: results['No'] || 0 },
+				{ option: 'Ja', votes: yesVotes },
+				{ option: 'Nein', votes: noVotes },
 			]);
 		}
 	}, [results]);
@@ -63,8 +69,18 @@ export default function YesNoQuestion({
 
 		try {
 			setIsSaving(true);
-			await saveUserAnswer(pollRunId, questionId, selectedOption as string);
-			setIsSaved(true);
+			// Always use consistent German answers
+			const answerValue = selectedOption === 'yes' ? 'Ja' : 'Nein';
+			const result = await saveUserAnswer(pollRunId, questionId, answerValue, userKey as string);
+
+			if (result.success) {
+				setIsSaved(true);
+				if (onAnswerSelected) {
+					onAnswerSelected(answerValue);
+				}
+			} else {
+				console.error('Error saving answer:', result.error);
+			}
 		} catch (error) {
 			console.error('Error saving answer:', error);
 		} finally {
@@ -72,14 +88,8 @@ export default function YesNoQuestion({
 		}
 	};
 
-	const handleOptionClick = (option: 'Yes' | 'No') => {
-		// Prevent changes if answer is already saved
-		if (isSaved) return;
-
+	const handleOptionClick = (option: string) => {
 		setSelectedOption(option);
-		if (onAnswerSelected) {
-			onAnswerSelected(option);
-		}
 	};
 
 	return (
@@ -88,9 +98,9 @@ export default function YesNoQuestion({
 
 			<div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 justify-center mt-4 max-w-md mx-auto">
 				<button
-					onClick={() => handleOptionClick('Yes')}
+					onClick={() => handleOptionClick('yes')}
 					className={`px-8 py-4 rounded-lg border-2 transition-all ${
-						selectedOption === 'Yes'
+						selectedOption === 'yes'
 							? 'bg-green-500 text-white border-green-600 dark:bg-green-600 dark:border-green-500'
 							: 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800'
 					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}
@@ -99,9 +109,9 @@ export default function YesNoQuestion({
 				</button>
 
 				<button
-					onClick={() => handleOptionClick('No')}
+					onClick={() => handleOptionClick('no')}
 					className={`px-8 py-4 rounded-lg border-2 transition-all ${
-						selectedOption === 'No'
+						selectedOption === 'no'
 							? 'bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-500'
 							: 'border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-800'
 					} ${isSaved ? 'opacity-80 cursor-not-allowed' : ''}`}

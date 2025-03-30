@@ -5,6 +5,7 @@ import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
 import { useCurrentResultsSSE } from '@/hooks/use-current-results-sse';
+import { useUser } from '@/lib/context';
 
 interface ScaleQuestionProps {
 	questionId: string;
@@ -21,6 +22,7 @@ export default function ScaleQuestion({
 	pollRunId,
 	isOwner = false,
 }: ScaleQuestionProps) {
+	const { userKey } = useUser();
 	const [sliderValue, setSliderValue] = useState<number>(4); // Default to middle value
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -67,7 +69,7 @@ export default function ScaleQuestion({
 	const handleSubmit = async () => {
 		try {
 			setIsSaving(true);
-			await saveUserAnswer(pollRunId, questionId, sliderValue.toString());
+			await saveUserAnswer(pollRunId, questionId, sliderValue.toString(), userKey as string);
 			setIsSaved(true);
 		} catch (error) {
 			console.error('Error saving answer:', error);

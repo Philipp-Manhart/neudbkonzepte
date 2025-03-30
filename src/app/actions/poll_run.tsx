@@ -386,6 +386,7 @@ export async function saveUserAnswer(
 		}
 
 		const isMultipleChoice = questionData.type === 'multiple-choice' || questionData.type === 'multiple';
+		const isYesNo = questionData.type === 'yes-no';
 
 		// Handle answers appropriately based on their type
 		let answersArray: string[];
@@ -407,6 +408,15 @@ export async function saveUserAnswer(
 			answersArray = answers;
 		}
 
+		// Normalize yes/no answers to German for consistency
+		if (isYesNo) {
+			answersArray = answersArray.map((answer) => {
+				if (answer === 'Yes') return 'Ja';
+				if (answer === 'No') return 'Nein';
+				return answer;
+			});
+		}
+
 		// Validate that we're receiving the correct answer format for the question type
 		if (!isMultipleChoice && answersArray.length > 1) {
 			return { success: false, error: 'Mehrfachauswahl ist für diese Frage nicht erlaubt' };
@@ -417,7 +427,8 @@ export async function saveUserAnswer(
 
 		// If user already answered this question, get previous answers to decrement them
 		if (userId) {
-			const userAnswerKey = `user:${userId}:poll_run:${pollRunId}:question:${questionId}`;
+			// Fix the userAnswerKey to use correct format
+			const userAnswerKey = `${userId}:poll_run:${pollRunId}:question:${questionId}`;
 			const previousAnswersData = await redis.get(userAnswerKey);
 
 			if (previousAnswersData) {
@@ -506,6 +517,7 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 
 			let userAnswerPromise: Promise<string | null> | undefined;
 			if (userKey) {
+				// Fix the user answer key format to match what we use in saveUserAnswer
 				userAnswerPromise = redis.get(`${userKey}:poll_run:${pollRunId}:question:${questionId}`);
 			}
 

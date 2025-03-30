@@ -22,14 +22,24 @@ export default function MyParticipations() {
 						const enhancedPollRuns = await Promise.all(
 							response.pollRuns.map(async (pollRun) => {
 								try {
-									// Extract pollId from the response
-									const pollId = pollRun.pollKey.split(':')[1];
+									// Extract pollId safely with fallback to pollId property or empty string
+									let pollId = '';
 
-									// Get poll details
-									const pollDetails = await getPoll(pollId);
+									if (pollRun.pollKey && typeof pollRun.pollKey === 'string') {
+										const parts = pollRun.pollKey.split(':');
+										pollId = parts.length > 1 ? parts[1] : '';
+									} else if (pollRun.pollId) {
+										pollId = pollRun.pollId;
+									}
 
-									// Format date
-									const formattedDate = new Date(parseInt(pollRun.created));
+									// Only fetch poll details if we have a pollId
+									let pollDetails = null;
+									if (pollId) {
+										pollDetails = await getPoll(pollId);
+									}
+
+									// Format date safely
+									const formattedDate = pollRun.created ? new Date(parseInt(pollRun.created)) : new Date();
 
 									return {
 										pollRunId: pollRun.pollRunId,
@@ -38,17 +48,18 @@ export default function MyParticipations() {
 										description: pollDetails?.description || '',
 										participatedAt: formattedDate,
 										participants: pollRun.participantsCount || '0',
-										questionCount: pollRun.questionCount || '0',
+										questionCount: parseInt(pollRun.questionCount) || 0,
 									};
 								} catch (error) {
 									console.error(`Failed to fetch details for poll ${pollRun.pollRunId}:`, error);
 									return {
-										pollRunId: pollRun.pollRunId,
-										pollId: pollRun.pollId,
+										pollRunId: pollRun.pollRunId || 'unknown',
+										pollId: '',
 										pollName: 'Unnamed Poll',
 										description: '',
 										participatedAt: new Date(),
 										participants: pollRun.participantsCount || '0',
+										questionCount: 0,
 									};
 								}
 							})

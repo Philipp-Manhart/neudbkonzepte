@@ -4,6 +4,7 @@ import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
 import { useCurrentResultsSSE } from '@/hooks/use-current-results-sse';
+import { useUser } from '@/lib/context';
 
 interface MultipleChoiceQuestionProps {
 	questionId: string;
@@ -22,6 +23,7 @@ export default function MultipleChoiceQuestion({
 	onAnswerSelected,
 	isOwner = false,
 }: MultipleChoiceQuestionProps) {
+	const { userKey } = useUser();
 	const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -70,7 +72,7 @@ export default function MultipleChoiceQuestion({
 		try {
 			setIsSaving(true);
 			// Send the actual array instead of a JSON string
-			await saveUserAnswer(pollRunId, questionId, selectedOptions);
+			await saveUserAnswer(pollRunId, questionId, selectedOptions, userKey as string);
 			setIsSaved(true);
 		} catch (error) {
 			console.error('Error saving answer:', error);

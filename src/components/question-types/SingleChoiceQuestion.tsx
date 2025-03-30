@@ -4,6 +4,7 @@ import SubmitAnswer from './SubmitAnswer';
 import { saveUserAnswer } from '@/app/actions/poll_run';
 import QuestionVotesChart from '@/components/app-question-votes-chart';
 import { useCurrentResultsSSE } from '@/hooks/use-current-results-sse';
+import { useUser } from '@/lib/context';
 
 interface SingleChoiceQuestionProps {
 	questionId: string;
@@ -22,6 +23,7 @@ export default function SingleChoiceQuestion({
 	pollRunId,
 	isOwner = false,
 }: SingleChoiceQuestionProps) {
+	const { userKey } = useUser();
 	const [selectedOption, setSelectedOption] = useState<string | null>(null);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
@@ -69,7 +71,7 @@ export default function SingleChoiceQuestion({
 
 		try {
 			setIsSaving(true);
-			await saveUserAnswer(pollRunId, questionId, selectedOption);
+			await saveUserAnswer(pollRunId, questionId, selectedOption, userKey as string);
 			setIsSaved(true);
 		} catch (error) {
 			console.error('Error saving answer:', error);

@@ -16,6 +16,7 @@ interface PollData {
 		questionText: string;
 		possibleAnswers: string[];
 		results: Record<string, number>;
+		userAnswers?: string[]; // Add this to the interface
 	}>;
 }
 
@@ -34,9 +35,8 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 		async function fetchPollData() {
 			try {
 				setIsLoading(true);
-				if (!isOwner) {
-					//TODO Hier die Daten gescheit zurückgeben
-					const data = await getQuestionResults(pollRunId, userKey);
+				if (!isOwner && userKey) {
+					const data = await getQuestionResults(pollRunId, userKey as string);
 					setPollData(data);
 				} else {
 					const data = await getQuestionResults(pollRunId);
@@ -50,13 +50,40 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 		}
 
 		fetchPollData();
-	}, [pollRunId]);
+	}, [pollRunId, userKey, isOwner]);
 
 	// Convert data for the current question to the format expected by the chart
 	const prepareChartData = (questionIndex: number) => {
 		if (!pollData) return [];
 		const question = pollData.questions[questionIndex];
 		if (!question) return [];
+
+		// Special handling for yes/no questions to normalize language
+		if (question.type === 'yes-no') {
+			// Create a map to store the votes
+			const optionVotes: Record<string, number> = {
+				Ja: 0,
+				Nein: 0,
+			};
+
+			// Process the results, combining English and German answers
+			Object.entries(question.results).forEach(([option, votes]) => {
+				if (option === 'Yes' || option === 'Ja') {
+					optionVotes['Ja'] = (optionVotes['Ja'] || 0) + votes;
+				} else if (option === 'No' || option === 'Nein') {
+					optionVotes['Nein'] = (optionVotes['Nein'] || 0) + votes;
+				} else {
+					// For any other unexpected value
+					optionVotes[option] = votes;
+				}
+			});
+
+			// Convert to chart format
+			return Object.entries(optionVotes).map(([option, votes]) => ({
+				option,
+				votes,
+			}));
+		}
 
 		// Handle multiple-choice questions differently
 		if (question.type === 'multiple-choice') {
@@ -107,6 +134,21 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 		setCurrentQuestionIndex((prev) => (prev < pollData.questions.length - 1 ? prev + 1 : 0));
 	};
 
+	// Format user answer for display
+	const formatUserAnswer = (question: any) => {
+		if (!question.userAnswers || question.userAnswers.length === 0) {
+			return 'Keine Antwort abgegeben';
+		}
+		
+		// Handle different question types
+		if (question.type === 'multiple-choice' || question.type === 'multiple') {
+			return question.userAnswers.join(', ');
+		}
+		
+		// For simple answers (single choice, yes-no, scale)
+		return question.userAnswers[0];
+	};
+
 	// Early return while loading or if no data
 	if (isLoading || !pollData) {
 		return <div className="container py-6">Loading poll results...</div>;
@@ -135,11 +177,11 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 			<div className="max-w-3xl mx-auto">
 				{currentQuestion && <QuestionVotesChart chartData={chartData} title={currentQuestion.questionText} />}
 			</div>
-			{!isOwner && (
-				<div className="mt-8 max-w-3xl mx-auto  rounded-lg p-4 flex items-center">
-					<p className="font-medium text-slate-700">
-{/* 						TODO: Hier brauch ich die Antwort vom Participant aus den Daten
- */}						Deine Antwort war: <span className=" font-semibold">Data</span>
+			
+			{!isOwner && currentQuestion && currentQuestion.userAnswers && (
+				<div className="mt-8 max-w-3xl mx-auto bg-slate-50 dark:bg-slate-800 rounded-lg p-4 flex items-center">
+					<p className="font-medium text-slate-700 dark:text-slate-200">
+						Deine Antwort war: <span className="font-semibold">{formatUserAnswer(currentQuestion)}</span>
 					</p>
 				</div>
 			)}
