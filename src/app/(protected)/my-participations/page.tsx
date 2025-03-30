@@ -5,7 +5,6 @@ import { getPollRunsByParticipant } from '@/app/actions/poll_run';
 import { getPoll } from '@/app/actions/poll';
 import { useState, useEffect } from 'react';
 import { useUser } from '@/lib/context';
-import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MyParticipations() {
 	const [participations, setParticipations] = useState<any[]>([]);
@@ -73,19 +72,17 @@ export default function MyParticipations() {
 	if (loading) {
 		return (
 			<div className="container mx-auto py-6">
-				<h1 className="text-3xl font-bold mb-6">Meine Teilnahmen</h1>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					{[...Array(4)].map((_, i) => (
-						<Skeleton key={i} className="h-48 w-full" />
-					))}
+				<h1 className="text-3xl font-bold mb-6 text-center">Meine Teilnahmen</h1>
+				<div className="flex justify-center items-center py-20">
+					<p className="text-lg text-muted-foreground">Lade Teilnahmen...</p>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="container mx-auto py-6">
-			<h1 className="text-3xl font-bold mb-6">Meine Teilnahmen</h1>
+		<div className="container mx-auto py-6 px-4">
+			<h1 className="text-3xl font-bold mb-6 text-center">Meine Teilnahmen</h1>
 			<ParticipationList participations={participations} isOwner={false} />
 		</div>
 	);

@@ -63,10 +63,15 @@ export function ParticipationCard({ participation, isOwner, onDelete }: Particip
 	return (
 		<Card className="h-full flex flex-col relative">
 			<CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2">
-				<div className="flex items-center">
-					<h2 className="text-2xl font-bold pr-8">{participation.pollName}</h2>
+				<div className="flex items-center gap-2">
+					<h2 className="text-2xl font-bold">{participation.pollName}</h2>
 					{isOwner && (
-						<Button variant="outline" onClick={handleDeletePollRun} disabled={isDeleting}>
+						<Button
+							variant="outline"
+							size="icon"
+							onClick={handleDeletePollRun}
+							disabled={isDeleting}
+							className="ml-auto">
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					)}
