@@ -115,7 +115,7 @@ export default function PollRunContent({ params, isOwner }: PollRunContentProps)
 	if (pollRun.status === 'closed') {
 		return (
 			<div className="flex justify-center items-center h-60">
-				<h1 className="text-4xl font-bold text-center">
+				<h1 className="text-2xl font-semibold text-center">
 					{isOwner
 						? 'Diese Umfrage ist vorbei, schaue dir die Ergebnisse in Meine Durchläufe an!'
 						: 'Diese Umfrage ist vorbei, danke für deine Teilnahme! Schaue dir die Ergebnisse in Meine Teilnahmen an!'}

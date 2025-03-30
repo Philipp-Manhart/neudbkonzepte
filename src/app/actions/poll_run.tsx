@@ -475,6 +475,16 @@ export async function getQuestionResults(pollRunId: string, userKey?: string) {
 
 			// Format the results - exclude initialization data and convert to numbers
 			const formattedResults: Record<string, number> = {};
+
+			// First initialize all possible answers with 0 votes
+			if (Array.isArray(possibleAnswers)) {
+				possibleAnswers.forEach((answer) => {
+					const answerKey = typeof answer === 'object' ? answer.value || answer.id : answer;
+					formattedResults[answerKey] = 0;
+				});
+			}
+
+			// Then add the actual vote counts from results data
 			Object.entries(resultsData).forEach(([key, value]) => {
 				if (key !== 'initialized') {
 					formattedResults[key] = parseInt(value as string, 10) || 0;

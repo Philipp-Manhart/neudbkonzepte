@@ -9,9 +9,11 @@ import { getPollRunsByPollId } from '@/app/actions/poll_run';
 export default function Dashboard() {
 	const { userKey } = useUser();
 	const [polls, setPolls] = useState<Poll[] | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		async function getPolls() {
+			setIsLoading(true);
 			const pollData = await getPollsByOwner(userKey as string);
 
 			if (Array.isArray(pollData)) {
@@ -31,27 +33,30 @@ export default function Dashboard() {
 					})
 				);
 				setPolls(pollsWithRunCounts as Poll[]);
+			} else {
+				// If not an array, set polls as empty array
+				setPolls([]);
 			}
+			setIsLoading(false);
 		}
-		getPolls();
+
+		if (userKey) {
+			getPolls();
+		}
 	}, [userKey]);
 
-	if (polls === null) {
-		return <div>Loading...</div>;
+	if (isLoading) {
+		return <div className="flex justify-center items-center min-h-[50vh]">Lade Abstimmungen...</div>;
 	}
 
-	// Check if polls contains an error object
-	if (!Array.isArray(polls) && polls.error) {
+	// Check if polls is empty
+	if (!polls || polls.length === 0) {
 		return (
-			<div className="flex flex-col items-center pt-[25vh]">
-				<p className="text-xl font-semibold">Du hast keine Abstimmungen</p>
+			<div className="flex flex-col items-center justify-center py-20">
+				<h2 className="text-2xl font-semibold mb-2">Keine Abstimmungen vorhanden</h2>
+				<p className="text-muted-foreground">Du hast bis jetzt keine Abstimmungen erstellt.</p>
 			</div>
 		);
-	}
-
-	// Ensure polls is an array before rendering
-	if (!Array.isArray(polls)) {
-		return <div>Fehler beim Laden der Abstimmungen</div>;
 	}
 
 	return (

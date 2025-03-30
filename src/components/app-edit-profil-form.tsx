@@ -38,7 +38,6 @@ export function EditProfileForm({ initialData, action }: EditProfileFormProps) {
 				<form
 					action={(formData) => {
 						startTransition(async () => {
-
 							try {
 								const result = await action(formData);
 								if (result?.error) {

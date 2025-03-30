@@ -13,9 +13,10 @@ import { toast } from 'sonner';
 
 interface pollCardProps {
 	poll: Poll;
+	onDelete?: (pollId: string) => void;
 }
 
-export function PollCard({ poll }: pollCardProps) {
+export function PollCard({ poll, onDelete }: pollCardProps) {
 	const router = useRouter();
 	const [isStarting, setIsStarting] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
@@ -44,14 +45,16 @@ export function PollCard({ poll }: pollCardProps) {
 
 		if (response.success) {
 			toast.success('Umfrage erfolgreich gelöscht.');
+			// Call the onDelete callback to update the parent state
+			if (onDelete) {
+				onDelete(poll.pollId as string);
+			}
 			router.refresh();
 		} else {
 			console.error('Failed to delete poll:', response.error);
 			toast.error('Fehler beim Löschen der Umfrage.');
 		}
 	}
-
-
 
 	return (
 		<Card className="h-full flex flex-col">
@@ -87,7 +90,10 @@ export function PollCard({ poll }: pollCardProps) {
 				</div>
 			</CardContent>
 			<CardFooter className="flex flex-col md:flex-row pt-2 gap-2 w-full">
-				<Button className="w-full flex-1 flex items-center gap-2" onClick={handleStartPoll} disabled={isStarting || isDeleting}>
+				<Button
+					className="w-full flex-1 flex items-center gap-2"
+					onClick={handleStartPoll}
+					disabled={isStarting || isDeleting}>
 					<PlayIcon className="h-4 w-4" />
 					{isStarting ? 'Wird gestartet...' : 'Durchführen'}
 				</Button>
