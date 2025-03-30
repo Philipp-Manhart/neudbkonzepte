@@ -22,7 +22,18 @@ export async function getUser(userKey: string) {
 
 export async function updateUser(userKey: string, first_name: string, last_name: string, email: string) {
 	try {
+		// Validate userKey
+		if (!userKey || typeof userKey !== 'string') {
+			console.error('Invalid userKey:', userKey);
+			return { success: false, error: 'Ungültiger Benutzer-Schlüssel' };
+		}
+
 		const originalEmail = await redis.hGet(userKey, 'email');
+
+		// Validate fields
+		if (!first_name || !last_name || !email) {
+			return { success: false, error: 'Alle Felder müssen ausgefüllt sein' };
+		}
 
 		const multi = redis.multi();
 		multi.hSet(userKey, {

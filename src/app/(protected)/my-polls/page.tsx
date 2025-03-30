@@ -39,7 +39,7 @@ export default function Dashboard() {
 			}
 			setIsLoading(false);
 		}
-		
+
 		if (userKey) {
 			getPolls();
 		}

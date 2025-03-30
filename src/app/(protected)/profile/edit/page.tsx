@@ -5,13 +5,11 @@ import { useUser } from '@/lib/context';
 import { editSchema } from '@/lib/zod';
 import { useState, useEffect } from 'react';
 
-interface User{
+interface User {
 	first_name: string;
 	last_name: string;
 	email: string;
 }
-
-
 
 export default function EditProfilePage() {
 	const { userKey } = useUser();
@@ -21,11 +19,11 @@ export default function EditProfilePage() {
 		async function getUserInfo() {
 			const user = await getUser(userKey as string);
 			console.log(user);
-			const userData={
+			const userData = {
 				email: user.email,
 				first_name: user.first_name,
 				last_name: user.last_name,
-			}
+			};
 			setUser(userData);
 		}
 		getUserInfo();
@@ -36,7 +34,6 @@ export default function EditProfilePage() {
 	}
 
 	async function handleSubmit(formData: FormData, userKey: string) {
-
 		try {
 			const data = {
 				email: formData.get('email')?.toString(),
@@ -61,14 +58,9 @@ export default function EditProfilePage() {
 
 			//Hier Profil Updaten
 			//TODO geht noch nicht (es kommt vom Backend Update fehlgeschlagen)
-			const response = await updateUser(
-				userKey,
-				new_first_name,
-				new_last_name,
-				new_email
-			);
+			const response = await updateUser(userKey, new_first_name, new_last_name, new_email);
 
-			console.log(response)
+			console.log(response);
 			return { success: true };
 		} catch (error) {
 			console.error(error);
@@ -78,7 +70,7 @@ export default function EditProfilePage() {
 
 	return (
 		<div className="container mx-auto py-10 px-4 sm:px-6">
-			<EditProfileForm initialData={user} action={handleSubmit} />
+			<EditProfileForm initialData={user} action={(formData) => handleSubmit(formData, userKey as string)} />
 		</div>
 	);
 }
