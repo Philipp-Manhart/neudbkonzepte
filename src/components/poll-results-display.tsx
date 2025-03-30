@@ -36,6 +36,7 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 			try {
 				setIsLoading(true);
 				if (!isOwner) {
+					//TODO Hier die Daten gescheit zurückgeben
 					const data = await getQuestionResults(pollRunId, userKey);
 					setPollData(data);
 				} else {
@@ -138,7 +139,8 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 			{!isOwner && (
 				<div className="mt-8 max-w-3xl mx-auto  rounded-lg p-4 flex items-center">
 					<p className="font-medium text-slate-700">
-						Deine Antwort war: <span className=" font-semibold">Data</span>
+{/* 						TODO: Hier brauch ich die Antwort vom Participant aus den Daten
+ */}						Deine Antwort war: <span className=" font-semibold">Data</span>
 					</p>
 				</div>
 			)}

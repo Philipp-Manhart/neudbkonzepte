@@ -26,6 +26,7 @@ export default function MultipleChoiceQuestion({
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
 	// Generate mock chart data based on the options
+	//TODO Hier die echten Daten für das Live ergebnis
 	const mockChartData = options.map((option) => ({
 		option,
 		votes: Math.floor(Math.random() * 10) + 1, // Random votes between 1-10

@@ -50,6 +50,8 @@ export default function MyParticipations() {
 
 				setLoading(true);
 				try {
+					//TODO Hier die richtigen Poll RUns zurückgeben
+
 					const realParticipations = await getPollRunsByParticipant(userKey);
 					console.log(realParticipations);
 					// Uncomment the line below to use real data instead of mock data
