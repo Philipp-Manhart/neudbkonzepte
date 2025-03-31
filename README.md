@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NeuDBKonzepte
 
-## Getting Started
+A modern database concept implementation project. For DHBW Heidenheim.
 
-First, run the development server:
+## Installation
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Follow these steps to set up the project locally:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/neudbkonzepte.git
+   cd neudbkonzepte
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. Install dependencies:
+   ```bash
+   npm i --force
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Run Redis server (in a separate terminal):
+   ```bash
+   redis-server
+   ```
+   This will start Redis on the standard port (6379).
 
-## Learn More
+4. Start the application:
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+## Testing Guide
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Create a new User and create a poll with him.
+- Go to "Meine Umfragen" and click on "Umfrage durchführen"
+- Open incognito tab or other browser
+- Login or stay anonymus
+- Enter Poll Run Code on the homepage, which is displayed on the Creator Waiting Room
+- Repeat 3-5 with desired amount of participants
+- Hit "Umfrage starten" on Creator Page
+- Vote with every Participant and watch live results
+- After Poll:
+- Participants check "Meine Teilnahmen" for the results (only if was logged in before entering the poll)
+- Owner checks "Meine Durchläufe" for the results
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technologies
 
-## Deploy on Vercel
+- Next.js
+- Redis
+- TailwindCSS
+- Shadcn/UI
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
