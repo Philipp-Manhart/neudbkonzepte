@@ -32,7 +32,6 @@ export function ParticipationCard({ participation, isOwner, onDelete }: Particip
 		: `/poll-result/participant/${participation.pollRunId}`;
 	const [isDeleting, setIsDeleting] = useState(false);
 
-	// Format date correctly regardless of input type
 	const formatDate = () => {
 		if (participation.participatedAt instanceof Date) {
 			return participation.participatedAt.toLocaleDateString();

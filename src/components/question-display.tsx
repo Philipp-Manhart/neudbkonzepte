@@ -10,14 +10,6 @@ import { Button } from './ui/button';
 import { endPollRun } from '@/app/actions/poll_run';
 import { toast } from 'sonner';
 
-interface Question {
-	id: string;
-	questionText: string;
-	type: string;
-	possibleAnswers?: string[];
-	position: number;
-}
-
 interface QuestionDisplayProps {
 	questions: any[];
 	pollRunId: string;
@@ -40,22 +32,18 @@ export default function QuestionDisplay({
 	const updateInProgress = useRef(false);
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-	// Use the SSE hook to listen for question updates
+	// SSE hook to listen for question updates
 	const { currentQuestionIndex: sseQuestionIndex, error: sseError } = useCurrentQuestionSSE(pollRunId, (data) => {
 		const newIndex = parseInt(data.currentQuestionIndex);
-		console.log(`Received question update from SSE: ${newIndex}`);
-
-		// Reset timer when question changes via SSE
 		if (newIndex !== currentQuestionIndex) {
 			setTimeLeft(defaultDuration);
 		}
 	});
 
-	// When the SSE index changes, update our local state
+	// When the SSE index changes update local state
 	useEffect(() => {
 		// Only update if the SSE index is different from our current index
 		if (sseQuestionIndex !== currentQuestionIndex) {
-			console.log(`Updating from SSE: ${sseQuestionIndex}`);
 			setCurrentQuestionIndex(sseQuestionIndex);
 			setTimeLeft(defaultDuration);
 
@@ -81,27 +69,20 @@ export default function QuestionDisplay({
 		}
 
 		if (currentQuestionIndex < questions.length - 1) {
-			console.log(`Advancing from question ${currentQuestionIndex} to ${currentQuestionIndex + 1}`);
 
 			if (isOwner) {
 				// If the user is the poll owner, use the server action to update the question
 				const result = await updateCurrentQuestion(pollRunId, 'next');
 				if (!result.success) {
-					console.error('Failed to advance question:', result.error);
+					console.error('Fehler beim Laden der nächsten Frage:', result.error);
 				}
 			} else {
-				// For participants, just update the local state
+				// For participants just update the local state
 				setCurrentQuestionIndex((prev) => prev + 1);
 				setTimeLeft(defaultDuration);
 			}
 		} else {
-			console.log('All questions completed');
 			setPollCompleted(true);
-
-			// If owner, update the server state to mark the poll as completed
-			if (isOwner) {
-				// Optional: Add server action to mark poll as completed
-			}
 		}
 
 		// Allow updates again after a short delay
@@ -111,7 +92,7 @@ export default function QuestionDisplay({
 		}, 50);
 	};
 
-	// End the Poll Run
+	// End Poll Run
 	const handleEndPollRun = async () => {
 		if (updateInProgress.current || isAdvancing || !isOwner) return;
 
@@ -163,26 +144,16 @@ export default function QuestionDisplay({
 	}, [pollCompleted, questions.length, currentQuestionIndex, isOwner]);
 
 	if (!questions || questions.length === 0) {
-		return <div className="flex justify-center items-center h-screen">No questions available</div>;
+		return <div className="flex justify-center items-center h-screen">Keine Fragen verfügbar.</div>;
 	}
 
-	if (pollCompleted) {
-		return (
-			<div className="flex flex-col justify-center items-center h-screen">
-				<h2 className="text-2xl font-bold mb-4">Poll Completed</h2>
-				<p>Thank you for participating!</p>
-			</div>
-		);
-	}
 
 	if (!currentQuestion) {
-		return <div className="flex justify-center items-center h-screen">Loading question...</div>;
+		return <div className="flex justify-center items-center h-screen">Lade Fragen...</div>;
 	}
 
-	// No need to parse - possibleAnswers is already an array
 	const options = currentQuestion.possibleAnswers || [];
 
-	// Function to render the appropriate question component based on type
 	const renderQuestionComponent = () => {
 		switch (currentQuestion.type) {
 			case 'scale':
@@ -259,7 +230,7 @@ export default function QuestionDisplay({
 				<div className="shadow-md rounded-lg p-6 mb-6">{renderQuestionComponent()}</div>
 
 				<div className="text-center">
-					<div className="text-xl font-bold">Time remaining: {timeLeft} seconds</div>
+					<div className="text-xl font-bold">verbleibende Zeit: {timeLeft} Sekunden</div>
 					<div className="h-3 w-full rounded-full mt-2">
 						<div
 							className="bg-green-500 h-3 rounded-full transition-all duration-1000"

@@ -17,10 +17,9 @@ export default function ParticipantListWaitingRoom({
 	questionsCount,
 	participants: initialParticipants,
 }: ParticipantListWaitingRoomProps) {
-	// Use our SSE hook to get real-time participant count
+	// SSE hook to get real-time participant count
 	const { participantsCount, loading } = useParticipantsSSE(pollRunId);
 
-	// Calculate placeholder values
 	const actualParticipantsCount = loading ? initialParticipants.length.toString() : participantsCount;
 
 	return (

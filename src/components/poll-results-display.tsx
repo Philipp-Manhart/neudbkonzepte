@@ -16,7 +16,7 @@ interface PollData {
 		questionText: string;
 		possibleAnswers: string[];
 		results: Record<string, number>;
-		userAnswers?: string[]; // Add this to the interface
+		userAnswers?: string[];
 	}>;
 }
 
@@ -43,7 +43,7 @@ export default function PollResultsDisplay({ pollRunId, isOwner }: PollResultsDi
 					setPollData(data);
 				}
 			} catch (error) {
-				console.error('Failed to fetch poll results:', error);
+				console.error('Fehler beim Laden der Umfragenergebnisse:', error);
 			} finally {
 				setIsLoading(false);
 			}

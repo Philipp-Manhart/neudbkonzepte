@@ -26,10 +26,9 @@ export default function YesNoQuestion({
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
-	// Use the SSE hook to get real-time results
+	// SSE hook to get real-time results
 	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
 
-	// Transform the results data for the chart with consistent German labels
 	const [chartData, setChartData] = useState([
 		{ option: 'Ja', votes: 0 },
 		{ option: 'Nein', votes: 0 },
@@ -69,7 +68,6 @@ export default function YesNoQuestion({
 
 		try {
 			setIsSaving(true);
-			// Always use consistent German answers
 			const answerValue = selectedOption === 'yes' ? 'Ja' : 'Nein';
 			const result = await saveUserAnswer(pollRunId, questionId, answerValue, userKey as string);
 
@@ -79,10 +77,10 @@ export default function YesNoQuestion({
 					onAnswerSelected(answerValue);
 				}
 			} else {
-				console.error('Error saving answer:', result.error);
+				console.error('Fehler beim speichern der Umfrage:', result.error);
 			}
 		} catch (error) {
-			console.error('Error saving answer:', error);
+			console.error('Fehler beim speichern der Umfrage:', error);
 		} finally {
 			setIsSaving(false);
 		}
@@ -123,7 +121,7 @@ export default function YesNoQuestion({
 			<SubmitAnswer
 				onSubmit={handleSubmit}
 				isDisabled={isSaving || !selectedOption || isSaved}
-				buttonText={isSaving ? 'Saving...' : isSaved ? 'Antwort Gespeichert' : 'Save Answer'}
+				buttonText={isSaving ? 'Speichert...' : isSaved ? 'Antwort Gespeichert' : 'Antwort Speichern'}
 			/>
 		</div>
 	);

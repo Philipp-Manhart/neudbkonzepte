@@ -25,10 +25,8 @@ export default function MyPollRuns() {
 									// Extract pollId from the response
 									const pollId = pollRun.pollKey.split(':')[1];
 
-									// Get poll details
 									const pollDetails = await getPoll(pollId);
 
-									// Format date
 									const formattedDate = new Date(parseInt(pollRun.created));
 
 									return {

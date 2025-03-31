@@ -24,7 +24,7 @@ export async function updateUser(userKey: string, first_name: string, last_name:
 	try {
 		// Validate userKey
 		if (!userKey || typeof userKey !== 'string') {
-			console.error('Invalid userKey:', userKey);
+			console.error('Falscher userKey:', userKey);
 			return { success: false, error: 'Ungültiger Benutzer-Schlüssel' };
 		}
 

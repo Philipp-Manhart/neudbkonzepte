@@ -8,7 +8,6 @@ interface ViewQuestionProps {
 }
 
 export default function ViewQuestion({ question }: ViewQuestionProps) {
-	// Helper function to get a readable question type label
 	const getQuestionTypeLabel = (type: QuestionType | null): string => {
 		if (!type) return 'Nicht festgelegt';
 

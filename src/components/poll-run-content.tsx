@@ -39,7 +39,7 @@ export default function PollRunContent({ params, isOwner }: PollRunContentProps)
 				}
 			}
 		} catch (error) {
-			console.error('Error fetching full poll data:', error);
+			console.error('Fehler beim Laden der Umfrage:', error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -60,18 +60,16 @@ export default function PollRunContent({ params, isOwner }: PollRunContentProps)
 				}
 			}
 		} catch (error) {
-			console.error('Error checking poll status:', error);
+			console.error('Fehler beim prüfen des Umfragenstatus:', error);
 		}
 	};
 
-	// Initial data load
 	useEffect(() => {
 		fetchFullPollData();
 	}, [params]);
 
 	// Status polling
 	useEffect(() => {
-		// Only set up polling if initial data is loaded
 		if (!isLoading) {
 			const intervalId = setInterval(() => {
 				checkPollStatus();

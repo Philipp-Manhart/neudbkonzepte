@@ -19,10 +19,8 @@ interface ParticipationListProps {
 }
 
 export function ParticipationList({ participations, isOwner }: ParticipationListProps) {
-	// Add local state to manage participations
 	const [localParticipations, setLocalParticipations] = useState(participations);
 
-	// Handler to remove a participation from the local state
 	const handleParticipationDeleted = (pollRunId: string) => {
 		setLocalParticipations((prev) => prev.filter((p) => p.pollRunId !== pollRunId));
 	};

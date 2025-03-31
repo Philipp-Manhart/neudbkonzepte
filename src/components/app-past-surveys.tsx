@@ -1,4 +1,3 @@
-//Hier die ganzen poll Cards mappen
 import { PollCard } from './app-poll-card';
 import { Poll } from '@/lib/definitions';
 import { useState } from 'react';
@@ -8,10 +7,8 @@ interface PastPollsProps {
 }
 
 export function PastCreatedPolls({ polls }: PastPollsProps) {
-	// Add local state to manage polls
 	const [localPolls, setLocalPolls] = useState(polls);
 
-	// Handler to remove a poll from the local state
 	const handlePollDeleted = (pollId: string) => {
 		setLocalPolls((prev) => prev.filter((p) => p.pollId !== pollId));
 	};

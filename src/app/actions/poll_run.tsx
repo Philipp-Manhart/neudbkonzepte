@@ -55,7 +55,7 @@ export async function createPollRun(pollId: string) {
 					// Validate JSON format
 					JSON.parse(possibleAnswers);
 				} catch (e) {
-					console.error('Error parsing possibleAnswers:', e);
+					console.error('Fehler beim Verarbeiten der Antowrten:', e);
 					possibleAnswers = '[]';
 				}
 
@@ -348,7 +348,6 @@ export async function enterPollRun(enterCode: string, userKey?: string) {
 			});
 
 			await multi.exec();
-			console.log(`Added participation for user ${userKey}`);
 		}
 
 		return { success: true, pollRunId: enterCode };
@@ -400,7 +399,7 @@ export async function saveUserAnswer(
 					answersArray = [answers];
 				}
 			} catch (e) {
-				// If parsing fails, treat as a single answer
+				// If parsing fails treat as a single answer
 				answersArray = [answers];
 			}
 		} else {

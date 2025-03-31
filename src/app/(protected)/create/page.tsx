@@ -104,7 +104,6 @@ export default function CreatePage() {
 							} else if (updatedData.type === 'scale') {
 								options = ['1', '2', '3', '4', '5', '6', '7'];
 							} else if (!updatedData.options) {
-								// For other types, keep 4 empty options if not specified
 								options = Array(4).fill('');
 							}
 

@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-//import { useUser } from '@/lib/context';
 import AppViewBasicSettings from './app-view-basic-settings';
 import { Poll, QuestionData } from '@/lib/definitions';
 import ViewQuestion from './app-view-question';
@@ -13,8 +12,6 @@ interface PollDetailsContentProps {
 }
 
 export default function PollViewContent({ pollData, questionData }: PollDetailsContentProps) {
-  //const { userKey } = useUser();
-
 
   return (
 		<div className="flex flex-col items-center gap-6">

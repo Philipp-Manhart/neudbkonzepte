@@ -23,14 +23,13 @@ export default function ScaleQuestion({
 	isOwner = false,
 }: ScaleQuestionProps) {
 	const { userKey } = useUser();
-	const [sliderValue, setSliderValue] = useState<number>(4); // Default to middle value
+	const [sliderValue, setSliderValue] = useState<number>(4);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
-	// Use the SSE hook to get real-time results
+	// SSE hook to get real-time results
 	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
 
-	// Transform the results data for the chart
 	const [chartData, setChartData] = useState(
 		[1, 2, 3, 4, 5, 6, 7].map((value) => ({
 			option: value.toString(),
@@ -72,14 +71,13 @@ export default function ScaleQuestion({
 			await saveUserAnswer(pollRunId, questionId, sliderValue.toString(), userKey as string);
 			setIsSaved(true);
 		} catch (error) {
-			console.error('Error saving answer:', error);
+			console.error('Fehler beim speichern der Antwort:', error);
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	const handleValueChange = (value: number[]) => {
-		// Prevent changes if answer is already saved
 		if (isSaved) return;
 
 		const newValue = value[0];

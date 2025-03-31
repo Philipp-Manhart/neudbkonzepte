@@ -18,7 +18,6 @@ export default function EditProfilePage() {
 	useEffect(() => {
 		async function getUserInfo() {
 			const user = await getUser(userKey as string);
-			console.log(user);
 			const userData = {
 				email: user.email,
 				first_name: user.first_name,
@@ -56,10 +55,8 @@ export default function EditProfilePage() {
 			const new_first_name = formData.get('first_name')?.toString() as string;
 			const new_last_name = formData.get('last_name')?.toString() as string;
 
-			//Hier Profil Updaten
-			const response = await updateUser(userKey, new_first_name, new_last_name, new_email);
+			await updateUser(userKey, new_first_name, new_last_name, new_email);
 
-			console.log(response);
 			return { success: true };
 		} catch (error) {
 			console.error(error);

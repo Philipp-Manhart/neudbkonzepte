@@ -28,10 +28,9 @@ export default function SingleChoiceQuestion({
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
-	// Use the SSE hook to get real-time results
+	// SSE hook to get real-time results
 	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
 
-	// Transform the results data for the chart
 	const [chartData, setChartData] = useState(
 		options.map((option) => ({
 			option,
@@ -74,14 +73,13 @@ export default function SingleChoiceQuestion({
 			await saveUserAnswer(pollRunId, questionId, selectedOption, userKey as string);
 			setIsSaved(true);
 		} catch (error) {
-			console.error('Error saving answer:', error);
+			console.error('Fehler beim speichern der Umfrage:', error);
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	const handleOptionClick = (option: string) => {
-		// Prevent changes if answer is already saved
 		if (isSaved) return;
 
 		setSelectedOption(option);

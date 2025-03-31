@@ -38,7 +38,6 @@ export default function MyParticipations() {
 										pollDetails = await getPoll(pollId);
 									}
 
-									// Format date safely
 									const formattedDate = pollRun.created ? new Date(parseInt(pollRun.created)) : new Date();
 
 									return {
@@ -51,7 +50,7 @@ export default function MyParticipations() {
 										questionCount: parseInt(pollRun.questionCount) || 0,
 									};
 								} catch (error) {
-									console.error(`Failed to fetch details for poll ${pollRun.pollRunId}:`, error);
+									console.error(`Fehler beim Laden der Umfrage: ${pollRun.pollRunId}:`, error);
 									return {
 										pollRunId: pollRun.pollRunId || 'unknown',
 										pollId: '',
@@ -69,7 +68,7 @@ export default function MyParticipations() {
 						setParticipations([]);
 					}
 				} catch (error) {
-					console.error('Failed to fetch participations:', error);
+					console.error('Fehler beim Laden der Teilnehmer:', error);
 					setParticipations([]);
 				} finally {
 					setLoading(false);

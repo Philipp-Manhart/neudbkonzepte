@@ -4,7 +4,6 @@ import { useState } from 'react';
 import AddQuestion from '@/components/app-add-question';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Save } from 'lucide-react';
-//import { useUser } from '@/lib/context';
 import { useRouter } from 'next/navigation';
 import BasicSettingsInput from '@/components/app-basic-settings-input';
 import { updatePoll } from '@/app/actions/poll';
@@ -24,7 +23,6 @@ interface PollDetailsContentProps {
 }
 
 export default function PollDetailsContent({ pollId, initialPollData, initialQuestionData }: PollDetailsContentProps) {
-	//const { userKey } = useUser();
 	const router = useRouter();
 	const [defaultTime, setDefaultTime] = useState([parseInt(initialPollData.defaultduration)]);
 	const [description, setDescription] = useState(initialPollData.description);
@@ -33,8 +31,6 @@ export default function PollDetailsContent({ pollId, initialPollData, initialQue
 	const [descriptionError, setDescriptionError] = useState('');
 
 	const [questions, setQuestions] = useState<QuestionData[]>(() => {
-		console.log('Initial question data:', initialQuestionData);
-
 		return initialQuestionData.map((q) => ({
 			questionId: q.questionId,
 			type: q.type,

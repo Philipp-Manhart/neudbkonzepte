@@ -28,10 +28,9 @@ export default function MultipleChoiceQuestion({
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
-	// Use the SSE hook to get real-time results
+	// SSE hook to get real-time results
 	const { results, isLoading, error } = useCurrentResultsSSE(pollRunId, questionId);
 
-	// Transform the results data for the chart
 	const [chartData, setChartData] = useState(
 		options.map((option) => ({
 			option,
@@ -71,18 +70,16 @@ export default function MultipleChoiceQuestion({
 
 		try {
 			setIsSaving(true);
-			// Send the actual array instead of a JSON string
 			await saveUserAnswer(pollRunId, questionId, selectedOptions, userKey as string);
 			setIsSaved(true);
 		} catch (error) {
-			console.error('Error saving answer:', error);
+			console.error('Fehler beim Speichern der Umfrage:', error);
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	const handleOptionClick = (option: string) => {
-		// Early return if the answer has already been saved
 		if (isSaved) return;
 
 		let newSelectedOptions: string[];

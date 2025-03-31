@@ -27,14 +27,12 @@ export function PollCard({ poll, onDelete }: pollCardProps) {
 		setIsStarting(true);
 		const newPollRun = await createPollRun(poll.pollId as string);
 
-		//const result = await startPollRun(newPollRun.pollRunId as string)
-
 		setIsStarting(false);
 
 		if (newPollRun.pollRunId) {
 			router.push(`/poll-run/${newPollRun.pollRunId}`);
 		} else {
-			console.error('Failed to start poll:', newPollRun.error);
+			console.error('Fehler beim Starten der Umfrage:', newPollRun.error);
 		}
 	}
 
@@ -51,7 +49,7 @@ export function PollCard({ poll, onDelete }: pollCardProps) {
 			}
 			router.refresh();
 		} else {
-			console.error('Failed to delete poll:', response.error);
+			console.error('Fehler beim Löschen der Umfrage:', response.error);
 			toast.error('Fehler beim Löschen der Umfrage.');
 		}
 	}

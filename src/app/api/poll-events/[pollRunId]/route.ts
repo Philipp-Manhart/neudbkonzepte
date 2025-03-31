@@ -56,14 +56,9 @@ export async function GET(request: Request, { params }: { params: { pollRunId: s
 			const abortHandler = async () => {
 				await cleanup();
 
-				// We need to check controller state before closing
-				// This operation is separate from the main cleanup to ensure it's not attempted in other scenarios
 				try {
-					// For ReadableStream controllers, there's no explicit way to check if it's closed
-					// We can wrap it in a try-catch and log but not re-throw the error
 					controller.close();
 				} catch (error) {
-					// Log but don't re-throw - we expect this might happen and we're handling it gracefully
 					console.error('Note: Controller may already be closed:', error.message);
 				}
 			};

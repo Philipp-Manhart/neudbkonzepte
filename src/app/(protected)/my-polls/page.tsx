@@ -34,7 +34,6 @@ export default function Dashboard() {
 				);
 				setPolls(pollsWithRunCounts as Poll[]);
 			} else {
-				// If not an array, set polls as empty array
 				setPolls([]);
 			}
 			setIsLoading(false);
