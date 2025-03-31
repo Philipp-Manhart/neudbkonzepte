@@ -1,4 +1,4 @@
-# NeuDBKonzepte
+# Neue DB Konzepte
 
 A modern database concept implementation project. For DHBW Heidenheim.
 
@@ -8,7 +8,7 @@ Follow these steps to set up the project locally:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/neudbkonzepte.git
+   git clone https://github.com/Philipp-Manhart/neuedbkonzepte
    cd neudbkonzepte
    ```
 
